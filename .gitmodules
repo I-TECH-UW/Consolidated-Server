@@ -1,0 +1,6 @@
+[submodule "fhir-core"]
+	path = fhir-core
+	url = git@github.com:I-TECH-UW/fhir-core.git
+[submodule "bulk-subscriber"]
+	path = bulk-subscriber
+	url = git@github.com:I-TECH-UW/bulk-subscriber.git
