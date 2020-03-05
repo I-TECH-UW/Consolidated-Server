@@ -4,3 +4,6 @@
 [submodule "bulk-subscriber"]
 	path = bulk-subscriber
 	url = git@github.com:I-TECH-UW/bulk-subscriber.git
+[submodule "bulk-data-requester"]
+	path = bulk-data-requester
+	url = git@github.com:I-TECH-UW/bulk-data-requester.git

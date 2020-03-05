@@ -1,26 +1,38 @@
 version: '3'
 
 services:
-  as-1:
+  bulk-subscriber:
     image: bulk-subscriber
     depends_on:
-      - cs-data-1
+      - consolidated-server-data
     ports:
       - 8082:8080
     links:
-      - "cs-data-1:as-database"
+      - "consolidated-server-data:bulk-subscriber-database"
       - "hapi-fhir-jpaserver-start-1:hapi-fhir-jpaserver-start"
     networks:
       - frontend
       - server-1
-  cs-data-1:
+  bulk-data-requester:
+    image: bulk-data-requester
+    depends_on:
+      - consolidated-server-data
+    ports:
+      - 8083:8080
+    links:
+      - "consolidated-server-data:bulk-data-requester-database"
+      - "hapi-fhir-jpaserver-start-1:hapi-fhir-jpaserver-start"
+    networks:
+      - frontend
+      - server-1
+  consolidated-server-data:
     image: postgres:12-alpine
     env_file:
       - ./docker/database.env # configure postgres
     ports:
       - 5436:5432
     volumes:
-      - db-data-1:/var/lib/postgresql/data
+      - consolidated-server-data:/var/lib/postgresql/data
     networks:
       - frontend
       - server-1
@@ -31,7 +43,6 @@ services:
     links:
       - "hapi-fhir-mysql-1:hapi-fhir-mysql"
     networks:
-      - frontend
       - server-1
   hapi-fhir-mysql-1:
     image: mysql:latest
@@ -74,6 +85,6 @@ networks:
   server-2:
       
 volumes:
-  db-data-1:
+  consolidated-server-data:
   hapi-fhir-mysql-2:
   hapi-fhir-mysql-1:
