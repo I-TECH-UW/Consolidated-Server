@@ -7,3 +7,7 @@
 [submodule "bulk-data-requester"]
 	path = bulk-data-requester
 	url = git@github.com:I-TECH-UW/bulk-data-requester.git
+[submodule "hapi-fhir-jpaserver-starter"]
+        path = hapi-fhir-jpaserver-starter
+        url = git@github.com:I-TECH-UW/hapi-fhir-jpaserver-starter.git
+                                                              
