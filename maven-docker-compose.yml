@@ -1,26 +1,26 @@
 version: '3'
 
 services:
-  bulk-subscriber:
-    image: bulk-subscriber
+  datasubscriber-webapp:
+    image: datasubscriber-webapp
     depends_on:
       - consolidated-server-data
     ports:
       - 8082:8080
     links:
-      - "consolidated-server-data:bulk-subscriber-database"
+      - "consolidated-server-data:datasubscriber-webapp-database"
       - "hapi-fhir-jpaserver-start-1:hapi-fhir-jpaserver-start"
     networks:
       - frontend
       - server-1
-  bulk-data-requester:
-    image: bulk-data-requester
+  dataimport-webapp:
+    image: dataimport-webapp
     depends_on:
       - consolidated-server-data
     ports:
       - 8083:8080
     links:
-      - "consolidated-server-data:bulk-data-requester-database"
+      - "consolidated-server-data:dataimport-webapp-database"
       - "hapi-fhir-jpaserver-start-1:hapi-fhir-jpaserver-start"
     networks:
       - frontend

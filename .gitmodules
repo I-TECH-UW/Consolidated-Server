@@ -1,12 +1,3 @@
-[submodule "fhir-core"]
-	path = fhir-core
-	url = git@github.com:I-TECH-UW/fhir-core.git
-[submodule "bulk-subscriber"]
-	path = bulk-subscriber
-	url = git@github.com:I-TECH-UW/bulk-subscriber.git
-[submodule "bulk-data-requester"]
-	path = bulk-data-requester
-	url = git@github.com:I-TECH-UW/bulk-data-requester.git
 [submodule "hapi-fhir-jpaserver-starter"]
         path = hapi-fhir-jpaserver-starter
         url = git@github.com:I-TECH-UW/hapi-fhir-jpaserver-starter.git
