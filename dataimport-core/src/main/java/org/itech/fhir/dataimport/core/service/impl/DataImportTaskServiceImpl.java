@@ -58,17 +58,18 @@ public class DataImportTaskServiceImpl extends CrudServiceImpl<DataImportTask, L
 	}
 
 	@Override
-	public DataImportTask saveTaskToServer(Long id, Long fhirResourceGrouId, Integer interval) {
+	public DataImportTask saveTaskToServer(Long id, Long fhirResourceGrouId, Integer maxInterval) {
 		return saveTaskToServer(serverDAO.findById(id).get(), fhirResourceGroupDAO.findById(fhirResourceGrouId).get(),
-				interval);
+				maxInterval);
 	}
 
 	@Override
-	public DataImportTask saveTaskToServer(FhirServer server, FhirResourceGroup fhirResourceGroup, Integer interval) {
-		log.debug("saving dataRequest task of type " + fhirResourceGroup + " to server with dataRequest interval "
-				+ interval);
+	public DataImportTask saveTaskToServer(FhirServer server, FhirResourceGroup fhirResourceGroup,
+			Integer maxInterval) {
+		log.debug("saving dataRequest task of type " + fhirResourceGroup + " to server with dataRequest maxInterval "
+				+ maxInterval);
 		DataImportTask dataImportTask = new DataImportTask(server, fhirResourceGroup);
-		dataImportTask.setDataImportInterval(interval);
+		dataImportTask.setMaxDataImportInterval(maxInterval);
 		return dataImportTaskDAO.save(dataImportTask);
 	}
 
@@ -85,6 +86,20 @@ public class DataImportTaskServiceImpl extends CrudServiceImpl<DataImportTask, L
 		}
 		log.debug("last data import success was at: " + lastSuccess);
 		return lastSuccess;
+	}
+
+	@Override
+	public Instant getLatestInstantForDataImportTask(DataImportTask dataImportTask) {
+		Instant lastAttempt = Instant.EPOCH;
+
+		List<DataImportAttempt> lastImportAttempts = dataImportAttemptDAO
+				.findLatestDataImportAttemptsByDataImportTask(PageRequest.of(0, 1), dataImportTask.getId());
+		if (lastImportAttempts.size() == 1) {
+			DataImportAttempt latestAttempt = lastImportAttempts.get(0);
+			lastAttempt = latestAttempt.getStartTime();
+		}
+		log.debug("last data import attempt was at: " + lastAttempt);
+		return lastAttempt;
 	}
 
 }

@@ -46,6 +46,7 @@ public class DataImportStatusServiceImpl implements DataImportStatusService {
 		case COMPLETE:
 		case FAILED:
 		case TIMED_OUT:
+		case NOT_RAN:
 			dataImportAttempt.setEndTime(Instant.now());
 		}
 		dataImportAttempt.setDataImportStatus(event.getDataImportStatus());

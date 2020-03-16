@@ -34,11 +34,11 @@ public class DataImportTaskController {
 	public ResponseEntity<DataImportTask> addDataImportTaskForServer(@PathVariable(value = "serverId") Long serverId,
 			@RequestBody @Valid CreateDataImportTaskDTO dto) {
 		DataImportTask newDataImportTask;
-		if (dto.getInterval() == null) {
+		if (dto.getMaxInterval() == null) {
 			newDataImportTask = dataImportTaskService.saveTaskToServer(serverId, dto.getFhirResourceGroupId());
 		} else {
 			newDataImportTask = dataImportTaskService.saveTaskToServer(serverId, dto.getFhirResourceGroupId(),
-					dto.getInterval());
+					dto.getMaxInterval());
 		}
 		return ResponseEntity.ok(newDataImportTask);
 	}
@@ -47,11 +47,11 @@ public class DataImportTaskController {
 	public ResponseEntity<DataImportTask> updateDataImportTaskForServer(
 			@PathVariable(value = "serverId") Long serverId, @RequestBody @Valid CreateDataImportTaskDTO dto) {
 		DataImportTask newDataImportTask;
-		if (dto.getInterval() == null) {
+		if (dto.getMaxInterval() == null) {
 			newDataImportTask = dataImportTaskService.saveTaskToServer(serverId, dto.getFhirResourceGroupId());
 		} else {
 			newDataImportTask = dataImportTaskService.saveTaskToServer(serverId, dto.getFhirResourceGroupId(),
-					dto.getInterval());
+					dto.getMaxInterval());
 		}
 		return ResponseEntity.ok(newDataImportTask);
 	}

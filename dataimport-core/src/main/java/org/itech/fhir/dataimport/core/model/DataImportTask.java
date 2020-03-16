@@ -23,11 +23,9 @@ import lombok.EqualsAndHashCode;
 @Entity
 public class DataImportTask extends AuditableEntity<Long> {
 
-	public static final TimeUnit INTERVAL_UNITS = TimeUnit.MINUTES;
+	public static final TimeUnit MAX_INTERVAL_UNITS = TimeUnit.MINUTES;
+	public static final TimeUnit MIN_INTERVAL_UNITS = TimeUnit.MINUTES;
 	public static final TimeUnit TIMEOUT_UNITS = TimeUnit.SECONDS;
-
-	private static final Integer DEFAULT_INTERVAL = 60 * 24 * 7;
-	private static final Integer DEFAULT_TIMEOUT = 60 * 2;
 
 	// persistence
 	@ManyToOne
@@ -44,13 +42,11 @@ public class DataImportTask extends AuditableEntity<Long> {
 	@NotNull
 	private FhirServer sourceServer;
 
-	// validation
-	@NotNull
-	private Integer dataRequestAttemptTimeout = DEFAULT_TIMEOUT;
+	private Integer dataRequestAttemptTimeout;
 
-	// validation
-	@NotNull
-	private Integer dataImportInterval = DEFAULT_INTERVAL;
+	private Integer maxDataImportInterval;
+
+	private Integer minDataImportInterval;
 
 	public DataImportTask() {
 	}

@@ -21,7 +21,7 @@ import lombok.Data;
 public class DataImportAttempt extends PersistenceEntity<Long> {
 
 	public enum DataImportStatus {
-		GENERATED('G'), REQUESTED('R'), SAVING('S'), COMPLETE('C'), FAILED('F'), TIMED_OUT('T');
+		GENERATED('G'), REQUESTED('R'), SAVING('S'), COMPLETE('C'), FAILED('F'), TIMED_OUT('T'), NOT_RAN('N');
 
 		private char code;
 

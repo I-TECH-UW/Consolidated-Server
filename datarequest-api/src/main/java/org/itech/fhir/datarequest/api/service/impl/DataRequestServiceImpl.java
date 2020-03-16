@@ -76,8 +76,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 		return new AsyncResult<>(requestDataFromServer(dataRequestAttempt, fhirResourceGroupId, dateRange));
 	}
 
-	// TODO synchronize on the server object if we can guarantee it will be the same
-	// object across requests
+	// TODO add retry mechanisms
 	@Transactional
 	private synchronized List<Bundle> requestDataFromServer(DataRequestAttempt dataRequestAttempt,
 			Long fhirResourceGroupId, DateRangeParam dateRange) {

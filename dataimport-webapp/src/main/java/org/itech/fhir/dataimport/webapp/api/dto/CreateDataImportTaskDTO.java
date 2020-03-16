@@ -10,6 +10,6 @@ public class CreateDataImportTaskDTO {
 	@NotNull
 	private Long fhirResourceGroupId;
 
-	private Integer interval;
+	private Integer maxInterval;
 
 }

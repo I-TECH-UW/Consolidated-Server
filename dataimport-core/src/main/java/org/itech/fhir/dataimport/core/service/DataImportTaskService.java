@@ -17,9 +17,11 @@ public interface DataImportTaskService extends CrudService<DataImportTask, Long>
 
 	DataImportTask saveTaskToServer(FhirServer server, FhirResourceGroup fhirResourceGroup);
 
-	DataImportTask saveTaskToServer(Long serverId, Long fhirResourceGroupId, Integer interval);
+	DataImportTask saveTaskToServer(Long serverId, Long fhirResourceGroupId, Integer maxInterval);
 
-	DataImportTask saveTaskToServer(FhirServer server, FhirResourceGroup fhirResourceGroup, Integer interval);
+	DataImportTask saveTaskToServer(FhirServer server, FhirResourceGroup fhirResourceGroup, Integer maxInterval);
 
 	Instant getLatestSuccessInstantForDataImportTask(DataImportTask dataImportTask);
+
+	Instant getLatestInstantForDataImportTask(DataImportTask dataImportTask);
 }
