@@ -1,15 +1,28 @@
 package org.itech.fhir.dataimport.api.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.itech.fhir.core.dao.ServerResourceIdMapDAO;
+import org.itech.fhir.core.model.FhirServer;
 import org.itech.fhir.core.model.ServerResourceIdMap;
 import org.itech.fhir.core.service.ServerService;
 import org.itech.fhir.dataimport.api.service.DataSaveService;
@@ -22,9 +35,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@ConditionalOnProperty(value = "org.itech.dataimport.forward-notify", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(value = "org.itech.dataimport.forward-notify", havingValue = "true", matchIfMissing = false)
 @Slf4j
-public class DataForwardSaveServiceImpl implements DataSaveService {
+public class DataForwardNotifyServiceImpl implements DataSaveService {
 
 	private ServerService serverService;
 	private FhirContext fhirContext;
@@ -33,7 +46,15 @@ public class DataForwardSaveServiceImpl implements DataSaveService {
 	@Value("${org.itech.destination-server}")
 	private String destinationServerPath;
 
-	public DataForwardSaveServiceImpl(ServerService serverService, FhirContext fhirContext,
+	@Value("#{'${org.itech.notification-server}'.split(',')}")
+	private List<String> notificationServerPaths;
+
+	@Value("${org.itech.openelis.username}")
+	private String openelisUsername;
+	@Value("${org.itech.openelis.password}")
+	private String openelisPassword;
+
+	public DataForwardNotifyServiceImpl(ServerService serverService, FhirContext fhirContext,
 			ServerResourceIdMapDAO sourceIdToLocalIdDAO) {
 		this.serverService = serverService;
 		this.fhirContext = fhirContext;
@@ -50,6 +71,13 @@ public class DataForwardSaveServiceImpl implements DataSaveService {
 		if (transactionBundle.getTotal() > 0) {
 			Bundle transactionResponseBundle = addBundleToLocalServer(transactionBundle);
 			savesourceIdToLocalIdMap(transactionBundle, transactionResponseBundle, sourceServerId);
+			for (String notificationServerPath : notificationServerPaths) {
+				try {
+					notifyBundleAtLocalServer(transactionBundle, transactionResponseBundle, notificationServerPath, sourceServerId);
+				} catch (IOException e) {
+					log.error("error notifying notification server at: " + notificationServerPath, e);
+				}
+			}
 		}
 	}
 
@@ -141,6 +169,34 @@ public class DataForwardSaveServiceImpl implements DataSaveService {
 	private String getIdFromLocation(String location) {
 		int firstSlashIndex = location.indexOf('/');
 		return location.substring(firstSlashIndex + 1, location.indexOf('/', firstSlashIndex + 1));
+	}
+
+	private void notifyBundleAtLocalServer(Bundle transactionBundle, Bundle transactionResponseBundle,
+			String notificationServerPath, Long sourceServerId) throws ClientProtocolException, IOException {
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		HttpPost httpPost = new HttpPost(notificationServerPath);
+
+		List<NameValuePair> postParameters = new ArrayList<>();
+		FhirServer server = serverService.getDAO().findById(sourceServerId).get();
+		postParameters.add(new BasicNameValuePair("serverUrl", server.getServerUrl().toString()));
+		postParameters.add(new BasicNameValuePair("transactionBundle",
+				fhirContext.newJsonParser().encodeResourceToString(transactionBundle)));
+		postParameters.add(new BasicNameValuePair("transactionResponseBundle",
+				fhirContext.newJsonParser().encodeResourceToString(transactionResponseBundle)));
+		httpPost.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+
+		String auth = openelisUsername + ":" + openelisPassword;
+		byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes("utf-8"));
+		httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encodedAuth);
+		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+			switch (response.getStatusLine().getStatusCode()) {
+			case 200:
+				log.debug("successfully contacted notification server");
+			default:
+				log.debug("received " + response.getStatusLine().getStatusCode() + "response from "
+						+ notificationServerPath);
+			}
+		}
 	}
 
 }

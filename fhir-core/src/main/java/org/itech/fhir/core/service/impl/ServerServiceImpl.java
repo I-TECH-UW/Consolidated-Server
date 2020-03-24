@@ -1,6 +1,7 @@
 package org.itech.fhir.core.service.impl;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.hibernate.ObjectNotFoundException;
 import org.itech.fhir.core.dao.ServerDAO;
@@ -25,19 +26,39 @@ public class ServerServiceImpl extends CrudServiceImpl<FhirServer, Long> impleme
 	}
 
 	@Override
-	public FhirServer saveNewServer(String name, String serverAddress) {
+	public FhirServer saveNewServer(String name, String serverUrl) {
 		log.debug("saving new server");
-		FhirServer server = new FhirServer(name, serverAddress);
+		FhirServer server = new FhirServer(name, serverUrl);
 		FhirServer addedServer = serverRepository.save(server);
 		return addedServer;
 	}
 
 	@Override
-	public FhirServer saveNewServer(String name, URI dataRequestUrl) {
+	public FhirServer saveNewServer(String name, URI serverUrl) {
 		log.debug("saving new server");
-		FhirServer server = new FhirServer(name, dataRequestUrl);
+		FhirServer server = new FhirServer(name, serverUrl);
 		FhirServer addedServer = serverRepository.save(server);
 		return addedServer;
+	}
+
+	@Override
+	public FhirServer getOrSaveNewServer(String name, URI serverUrl) {
+		Optional<FhirServer> fhirServer = serverRepository.findByAddress(serverUrl);
+		if (fhirServer.isPresent()) {
+			return fhirServer.get();
+		} else {
+			return saveNewServer(name, serverUrl);
+		}
+	}
+
+	@Override
+	public FhirServer getOrSaveNewServer(URI serverUrl) {
+		Optional<FhirServer> fhirServer = serverRepository.findByAddress(serverUrl);
+		if (fhirServer.isPresent()) {
+			return fhirServer.get();
+		} else {
+			return saveNewServer(serverUrl.getHost(), serverUrl);
+		}
 	}
 
 	@Override

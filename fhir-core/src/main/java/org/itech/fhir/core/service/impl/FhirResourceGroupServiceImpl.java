@@ -33,6 +33,13 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		if (fhirResourceGroupDAO.count() == 0) {
 			Set<ResourceSearchParam> resourceSearchParams = new HashSet<>();
 
+			FhirResourceGroup openElisOpenMrsBridge = fhirResourceGroupDAO
+					.save(new FhirResourceGroup("openElisOpenMrsBridge"));
+			Set<ResourceType> openElisOpenMrsBridgeResourceTypes = new HashSet<>();
+			openElisOpenMrsBridgeResourceTypes.add(ResourceType.Task);
+			resourceSearchParams
+					.addAll(createResourceSearchParams(openElisOpenMrsBridge, openElisOpenMrsBridgeResourceTypes));
+
 			FhirResourceGroup entities1 = fhirResourceGroupDAO
 					.save(new FhirResourceGroup(FhirResourceCategories.Entities_1.name()));
 			Set<ResourceType> entities1ResourceTypes = new HashSet<>();
@@ -175,6 +182,11 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		}
 		resourceSearchParamsDAO.saveAll(resourceTypes);
 		return newResourceGroup;
+	}
+
+	@Override
+	public FhirResourceGroupDAO getDAO() {
+		return fhirResourceGroupDAO;
 	}
 
 }

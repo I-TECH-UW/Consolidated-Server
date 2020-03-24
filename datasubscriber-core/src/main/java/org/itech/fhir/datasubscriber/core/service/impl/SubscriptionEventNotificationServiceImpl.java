@@ -1,17 +1,21 @@
 package org.itech.fhir.datasubscriber.core.service.impl;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.itech.fhir.datasubscriber.core.data.dao.BulkSubscriptionDAO;
 import org.itech.fhir.datasubscriber.core.data.model.BulkSubscription;
 import org.itech.fhir.datasubscriber.core.service.SubscriptionEventNotificationService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +29,6 @@ public class SubscriptionEventNotificationServiceImpl implements SubscriptionEve
 	private FhirContext fhirContext;
 	private BulkSubscriptionDAO bulkSubscriptionDAO;
 	private CloseableHttpClient httpClient;
-
-	@Value("${org.itech.fhir.datasubscriber.notify-server.address}")
-	private String notifyServerAddress;
 
 	public SubscriptionEventNotificationServiceImpl(FhirContext fhirContext, BulkSubscriptionDAO bulkSubscriptionDAO,
 			CloseableHttpClient httpClient) {
@@ -68,8 +69,19 @@ public class SubscriptionEventNotificationServiceImpl implements SubscriptionEve
 	}
 
 	private void notifySubscriberOfResourceType(ResourceType resourceType, BulkSubscription bulk) {
-		log.debug("notifying server of " + resourceType);
-		HttpPost httpPost = new HttpPost(notifyServerAddress + "/server/" + bulk.getSourceServer().getId());
+		BasicNameValuePair param1 = new BasicNameValuePair("serverId", bulk.getSourceServer().getId().toString());
+		HttpEntity entity;
+		try {
+			entity = new UrlEncodedFormEntity(Arrays.asList(param1));
+		} catch (UnsupportedEncodingException e) {
+			log.error("error occured notifying subscriber at " + bulk.getNotificationUri(), e);
+			return;
+		}
+
+		log.debug("notifying server of a resource change");
+		HttpPost httpPost = new HttpPost(bulk.getNotificationUri() + "/" + resourceType);
+		httpPost.setEntity(entity);
+
 		log.debug("notify server address " + httpPost.getURI());
 		try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
 			switch (httpResponse.getStatusLine().getStatusCode()) {
@@ -84,23 +96,32 @@ public class SubscriptionEventNotificationServiceImpl implements SubscriptionEve
 
 			return;
 		} catch (IOException e) {
-			log.error("error occured notifying subscriber at " + notifyServerAddress, e);
+			log.error("error occured notifying subscriber at " + bulk.getNotificationUri(), e);
 		}
 	}
 
 	@Override
 	@Async
 	public void notifyFromSource(Long sourceServerId) {
-		List<BulkSubscription> bulks = bulkSubscriptionDAO
-				.findSubscriptionsSubscribeToUri(sourceServerId);
+		List<BulkSubscription> bulks = bulkSubscriptionDAO.findSubscriptionsToServer(sourceServerId);
 		for (BulkSubscription bulk : bulks) {
 			notifySubscriber(bulk);
 		}
 	}
 
 	private void notifySubscriber(BulkSubscription bulk) {
+		BasicNameValuePair param1 = new BasicNameValuePair("serverId", bulk.getSourceServer().getId().toString());
+		HttpEntity entity;
+		try {
+			entity = new UrlEncodedFormEntity(Arrays.asList(param1));
+		} catch (UnsupportedEncodingException e) {
+			log.error("error occured notifying subscriber at " + bulk.getNotificationUri(), e);
+			return;
+		}
+
 		log.debug("notifying server of a resource change");
-		HttpPost httpPost = new HttpPost(notifyServerAddress + "/server/" + bulk.getSourceServer().getId());
+		HttpPost httpPost = new HttpPost(bulk.getNotificationUri());
+		httpPost.setEntity(entity);
 		log.debug("notify server address " + httpPost.getURI());
 		try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
 			switch (httpResponse.getStatusLine().getStatusCode()) {
@@ -112,10 +133,9 @@ public class SubscriptionEventNotificationServiceImpl implements SubscriptionEve
 				log.error("did not receive success message from notify server. Received httpResponse "
 						+ httpResponse.getStatusLine().getStatusCode());
 			}
-
 			return;
 		} catch (IOException e) {
-			log.error("error occured notifying subscriber at " + notifyServerAddress, e);
+			log.error("error occured notifying subscriber at " + bulk.getNotificationUri(), e);
 		}
 	}
 

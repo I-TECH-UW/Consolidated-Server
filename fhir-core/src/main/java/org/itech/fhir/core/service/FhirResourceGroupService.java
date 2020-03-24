@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.ResourceType;
+import org.itech.fhir.core.dao.FhirResourceGroupDAO;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.ResourceSearchParam;
 
@@ -32,5 +33,8 @@ public interface FhirResourceGroupService extends CrudService<FhirResourceGroup,
 
 	FhirResourceGroup createFhirResourceGroup(String resourceGroupName,
 			Set<ResourceSearchParam> resourceTypes);
+
+	@Override
+	FhirResourceGroupDAO getDAO();
 
 }
