@@ -1,5 +1,6 @@
 package org.itech.fhir.core.service.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.itech.fhir.core.dao.FhirResourceGroupDAO;
 import org.itech.fhir.core.dao.ResourceSearchParamDAO;
 import org.itech.fhir.core.model.FhirResourceGroup;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Service;
 public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGroup, Long>
 		implements FhirResourceGroupService {
 
+	private static final String OE_IDENTIFIER = "3f7d1c6b-2781-4707-847c-03d4cb579470";
+
 	private FhirResourceGroupDAO fhirResourceGroupDAO;
 	private ResourceSearchParamDAO resourceSearchParamsDAO;
 
@@ -29,16 +33,12 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		this.fhirResourceGroupDAO = fhirResourceGroupDAO;
 		this.resourceSearchParamsDAO = resourceSearchParamsDAO;
 
-		//this could eventually be moved into a database init script if needed
+		// this could eventually be moved into a database init script if needed
 		if (fhirResourceGroupDAO.count() == 0) {
 			Set<ResourceSearchParam> resourceSearchParams = new HashSet<>();
 
-			FhirResourceGroup openElisOpenMrsBridge = fhirResourceGroupDAO
-					.save(new FhirResourceGroup("openElisOpenMrsBridge"));
-			Set<ResourceType> openElisOpenMrsBridgeResourceTypes = new HashSet<>();
-			openElisOpenMrsBridgeResourceTypes.add(ResourceType.Task);
-			resourceSearchParams
-					.addAll(createResourceSearchParams(openElisOpenMrsBridge, openElisOpenMrsBridgeResourceTypes));
+			addOpenMrsBridgeGroup(resourceSearchParams);
+			addOpenElisInternalGroup(resourceSearchParams);
 
 			FhirResourceGroup entities1 = fhirResourceGroupDAO
 					.save(new FhirResourceGroup(FhirResourceCategories.Entities_1.name()));
@@ -68,14 +68,32 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 			resourceSearchParams.addAll(createResourceSearchParams(base, baseResourceTypes));
 
 			// put all fhirCategoriesToResourceTypes into the all type
-			FhirResourceGroup all = fhirResourceGroupDAO
-					.save(new FhirResourceGroup(FhirResourceCategories.All.name()));
-			Set<ResourceType> allResourceTypes = resourceSearchParams.stream()
-					.map(ResourceSearchParam::getResourceType).collect(Collectors.toSet());
+			FhirResourceGroup all = fhirResourceGroupDAO.save(new FhirResourceGroup(FhirResourceCategories.All.name()));
+			Set<ResourceType> allResourceTypes = resourceSearchParams.stream().map(ResourceSearchParam::getResourceType)
+					.collect(Collectors.toSet());
 			resourceSearchParams.addAll(createResourceSearchParams(all, allResourceTypes));
 
 			resourceSearchParamsDAO.saveAll(resourceSearchParams);
 		}
+
+	}
+
+	private void addOpenMrsBridgeGroup(Set<ResourceSearchParam> resourceSearchParams) {
+		FhirResourceGroup openElisOpenMrsBridge = fhirResourceGroupDAO
+				.save(new FhirResourceGroup("openElisOpenMrsBridge"));
+		resourceSearchParams.add(new ResourceSearchParam(openElisOpenMrsBridge, ResourceType.Task, "status",
+				Arrays.asList(TaskStatus.REQUESTED.toCode())));
+		resourceSearchParams.add(new ResourceSearchParam(openElisOpenMrsBridge, ResourceType.Task, "owner:Practitioner",
+				Arrays.asList(OE_IDENTIFIER)));
+		resourceSearchParams.add(new ResourceSearchParam(openElisOpenMrsBridge, ResourceType.ServiceRequest,
+				"performer:Practitioner", Arrays.asList(OE_IDENTIFIER)));
+	}
+
+	private void addOpenElisInternalGroup(Set<ResourceSearchParam> resourceSearchParams) {
+		FhirResourceGroup openElisInternalFhir = fhirResourceGroupDAO
+				.save(new FhirResourceGroup("openElisInternalApi"));
+		resourceSearchParams.add(new ResourceSearchParam(openElisInternalFhir, ResourceType.Task, "status",
+				Arrays.asList(TaskStatus.REQUESTED.toCode())));
 
 	}
 
@@ -113,7 +131,8 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 	@Override
 	public Map<Long, Map<ResourceType, Set<ResourceSearchParam>>> getAllFhirGroupIdsToResourceSearchParamsGroupedByResourceType() {
 		Map<Long, Map<ResourceType, Set<ResourceSearchParam>>> allFhirGroupsToResourceTypesGrouped = new HashMap<>();
-		allFhirGroupsToResourceTypesGrouped.putAll(groupResourceSearchParams(getAllFhirGroupIdsToResourceSearchParams()));
+		allFhirGroupsToResourceTypesGrouped
+				.putAll(groupResourceSearchParams(getAllFhirGroupIdsToResourceSearchParams()));
 		return allFhirGroupsToResourceTypesGrouped;
 	}
 

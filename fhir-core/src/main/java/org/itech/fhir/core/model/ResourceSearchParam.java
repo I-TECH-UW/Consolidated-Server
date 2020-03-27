@@ -45,11 +45,6 @@ public class ResourceSearchParam extends PersistenceEntity<Long> {
 
 	}
 
-	public ResourceSearchParam(ResourceType resourceType) {
-		this.resourceType = resourceType;
-		paramValues = new ArrayList<>();
-	}
-
 	public ResourceSearchParam(FhirResourceGroup fhirResourceGroup, ResourceType resourceType) {
 		this.fhirResourceGroup = fhirResourceGroup;
 		this.resourceType = resourceType;

@@ -17,6 +17,7 @@ import org.itech.fhir.dataimport.core.model.DataImportAttempt.DataImportStatus;
 import org.itech.fhir.dataimport.core.model.DataImportTask;
 import org.itech.fhir.dataimport.core.service.DataImportTaskService;
 import org.itech.fhir.datarequest.api.service.DataRequestService;
+import org.itech.fhir.datarequest.core.exception.DataRequestFailedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -112,7 +113,7 @@ public class DataImportServiceImpl implements DataImportService {
 			dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(),
 					DataImportStatus.COMPLETE);
 			return new AsyncResult<>(DataImportStatus.COMPLETE);
-		} catch (ExecutionException | InterruptedException | RuntimeException e) {
+		} catch (DataRequestFailedException | ExecutionException | InterruptedException | RuntimeException e) {
 			log.error("error occured while saving searchResultBundles to server", e);
 			dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(), DataImportStatus.FAILED);
 			return new AsyncResult<>(DataImportStatus.FAILED);

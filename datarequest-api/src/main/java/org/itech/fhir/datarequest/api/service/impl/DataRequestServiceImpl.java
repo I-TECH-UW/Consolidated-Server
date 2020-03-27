@@ -19,9 +19,11 @@ import org.itech.fhir.core.service.FhirResourceGroupService;
 import org.itech.fhir.core.service.ServerService;
 import org.itech.fhir.datarequest.api.service.DataRequestAttemptStatusService;
 import org.itech.fhir.datarequest.api.service.DataRequestService;
+import org.itech.fhir.datarequest.core.exception.DataRequestFailedException;
 import org.itech.fhir.datarequest.core.model.DataRequestAttempt;
 import org.itech.fhir.datarequest.core.model.DataRequestAttempt.DataRequestStatus;
 import org.itech.fhir.datarequest.core.service.DataRequestAttemptService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -29,12 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class DataRequestServiceImpl implements DataRequestService {
+
+	@Value("${basicUsername}")
+	private String basicUsername;
+	@Value("${basicPassword}")
+	private String basicPassword;
 
 	private ServerService serverService;
 	private DataRequestAttemptService dataRequestAttemptService;
@@ -56,7 +64,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 	@Async
 	@Transactional
 	public Future<List<Bundle>> requestDataFromServerSinceLastSucessfulRequest(Long serverId,
-			Long fhirResourceGroupId) {
+			Long fhirResourceGroupId) throws DataRequestFailedException {
 		return requestDataFromServerFromInstant(serverId, fhirResourceGroupId, dataRequestAttemptService
 				.getLatestSuccessInstantForSourceServerAndFhirResourceGroup(serverId, fhirResourceGroupId));
 	}
@@ -65,7 +73,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 	@Async
 	@Transactional
 	public Future<List<Bundle>> requestDataFromServerFromInstant(Long serverId, Long fhirResourceGroupId,
-			Instant lowerBound) {
+			Instant lowerBound) throws DataRequestFailedException {
 		log.debug("running dataRequest for server " + serverId);
 		DataRequestAttempt dataRequestAttempt = new DataRequestAttempt(serverService.getDAO().findById(serverId).get(),
 				fhirResourceGroupService.getDAO().findById(fhirResourceGroupId).get());
@@ -79,7 +87,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 	// TODO add retry mechanisms
 	@Transactional
 	private synchronized List<Bundle> requestDataFromServer(DataRequestAttempt dataRequestAttempt,
-			Long fhirResourceGroupId, DateRangeParam dateRange) {
+			Long fhirResourceGroupId, DateRangeParam dateRange) throws DataRequestFailedException {
 		try {
 			List<Bundle> searchBundles = getResourceBundlesFromSourceServer(dataRequestAttempt, dateRange);
 			dataRequestStatusService.changeDataRequestAttemptStatus(dataRequestAttempt.getId(),
@@ -91,7 +99,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 		}
 		log.error("could not complete a dataRequest task");
 		dataRequestStatusService.changeDataRequestAttemptStatus(dataRequestAttempt.getId(), DataRequestStatus.FAILED);
-		return new ArrayList<>();
+		throw new DataRequestFailedException();
 	}
 
 	private List<Bundle> getResourceBundlesFromSourceServer(DataRequestAttempt dataRequestAttempt,
@@ -111,6 +119,8 @@ public class DataRequestServiceImpl implements DataRequestService {
 					resourceSearchParamsSet.getValue());
 			IGenericClient sourceFhirClient = fhirContext
 					.newRestfulGenericClient(dataRequestAttempt.getServer().getServerUrl().toString());
+			BasicAuthInterceptor authInterceptor = new BasicAuthInterceptor(basicUsername, basicPassword);
+			sourceFhirClient.registerInterceptor(authInterceptor);
 			Bundle searchBundle = sourceFhirClient//
 					.search()//
 					.forResource(resourceSearchParamsSet.getKey().name())//

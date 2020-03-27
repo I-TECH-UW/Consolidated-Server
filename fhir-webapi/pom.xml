@@ -9,6 +9,7 @@
 		<version>0.0.0.8</version>
 	</parent>
 	<artifactId>fhir-webapi</artifactId>
+	<packaging>jar</packaging>
 	<name>Fhir Web Api</name> 
 
 	<properties>

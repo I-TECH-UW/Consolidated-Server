@@ -14,4 +14,4 @@ USER spring:spring
 
 COPY --from=maven-build /datasubscriber-webapp/target/*.jar /app.jar
 
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java ","-jar","/app.jar"]
