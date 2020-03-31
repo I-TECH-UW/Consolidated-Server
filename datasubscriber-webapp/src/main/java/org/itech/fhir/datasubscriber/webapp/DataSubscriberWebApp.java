@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableJpaRepositories("org.itech")
 @EntityScan("org.itech")
 @ComponentScan("org.itech")
-@PropertySource(value = { "file:/etc/openelis-global/common_ssl.properties", "classpath:application.properties" })
+@PropertySource(value = { "file:/run/secrets/common.properties", "classpath:application.properties" })
 
 public class DataSubscriberWebApp {
 
