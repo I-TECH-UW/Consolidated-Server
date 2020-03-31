@@ -2,9 +2,10 @@
 #FROM openjdk:11-jre-alpine
 FROM alpine
 RUN apk --no-cache add openjdk11
+RUN apk add --no-cache bash
 
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
+RUN addgroup --gid 8443 -S spring && adduser --uid 8443 -S spring-user -G spring
+USER spring-user:spring
 
 ADD ./target/*.jar /app.jar
 

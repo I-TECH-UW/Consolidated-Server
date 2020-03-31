@@ -9,7 +9,7 @@ services:
       dockerfile: docker/docker-build/Dockerfile
       
   datasubscriber-webapp:
-    image: datasubscriber-webpapp
+    image: datasubscriber-webapp
     build:
       context: ./datasubscriber-webapp
       dockerfile: docker/docker-build/Dockerfile
