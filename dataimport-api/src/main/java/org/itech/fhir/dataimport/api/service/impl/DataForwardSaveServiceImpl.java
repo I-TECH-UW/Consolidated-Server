@@ -30,7 +30,7 @@ public class DataForwardSaveServiceImpl implements DataSaveService {
 	private FhirContext fhirContext;
 	private ServerResourceIdMapDAO sourceIdToLocalIdDAO;
 
-	@Value("${org.itech.destination-server}")
+	@Value("${org.openelisglobal.fhirstore.uri}")
 	private String destinationServerPath;
 
 	public DataForwardSaveServiceImpl(ServerService serverService, FhirContext fhirContext,
