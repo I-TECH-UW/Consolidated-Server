@@ -125,7 +125,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 					.search()//
 					.forResource(resourceSearchParamsSet.getKey().name())//
 					.whereMap(searchParameters)//
-					.lastUpdated(dateRange)//
+//					.lastUpdated(dateRange)//
 					.returnBundle(Bundle.class).execute();
 			log.trace("received json " + fhirContext.newJsonParser().encodeResourceToString(searchBundle));
 			log.debug("received " + searchBundle.getTotal() + " entries of " + resourceSearchParamsSet.getKey());

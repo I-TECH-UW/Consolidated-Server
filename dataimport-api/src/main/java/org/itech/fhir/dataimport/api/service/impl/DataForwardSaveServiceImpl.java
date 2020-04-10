@@ -49,7 +49,7 @@ public class DataForwardSaveServiceImpl implements DataSaveService {
 		Bundle transactionBundle = createTransactionBundleFromSearchResults(sourceServerId, searchBundles);
 		if (transactionBundle.getTotal() > 0) {
 			Bundle transactionResponseBundle = addBundleToLocalServer(transactionBundle);
-			savesourceIdToLocalIdMap(transactionBundle, transactionResponseBundle, sourceServerId);
+//			savesourceIdToLocalIdMap(transactionBundle, transactionResponseBundle, sourceServerId);
 		}
 	}
 
