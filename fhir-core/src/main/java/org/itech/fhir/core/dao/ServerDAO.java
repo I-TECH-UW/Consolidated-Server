@@ -15,7 +15,7 @@ public interface ServerDAO extends JpaRepository<FhirServer, Long> {
 	@Query("SELECT s FROM FhirServer s WHERE s.name = :name")
 	Optional<FhirServer> findByName(@Param("name") String name);
 
-	@Query("SELECT s FROM FhirServer s WHERE s.serverUrl = :serverUrl")
-	Optional<FhirServer> findByAddress(@Param("serverUrl") URI serverUrl);
+	@Query("SELECT s FROM FhirServer s WHERE s.uri = :uri")
+	Optional<FhirServer> findByAddress(@Param("uri") URI uri);
 
 }

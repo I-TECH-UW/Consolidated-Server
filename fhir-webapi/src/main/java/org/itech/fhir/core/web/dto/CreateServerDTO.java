@@ -11,9 +11,9 @@ public class CreateServerDTO {
 
 	@NotBlank
 	@ValidName
-	private String name;
+	private String serverName;
 
 	@NotBlank
-	private String serverAddress;
+	private String serverUri;
 
 }

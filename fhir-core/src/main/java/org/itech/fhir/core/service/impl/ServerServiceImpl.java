@@ -34,39 +34,53 @@ public class ServerServiceImpl extends CrudServiceImpl<FhirServer, Long> impleme
 	}
 
 	@Override
-	public FhirServer saveNewServer(String name, URI serverUrl) {
+	public FhirServer saveNewServer(String name, URI uri) {
 		log.debug("saving new server");
-		FhirServer server = new FhirServer(name, serverUrl);
+		FhirServer server = new FhirServer(name, uri);
 		FhirServer addedServer = serverRepository.save(server);
 		return addedServer;
 	}
 
 	@Override
-	public FhirServer getOrSaveNewServer(String name, URI serverUrl) {
-		Optional<FhirServer> fhirServer = serverRepository.findByAddress(serverUrl);
+	public FhirServer getOrSaveNewServer(String name, URI uri) {
+		Optional<FhirServer> fhirServer = serverRepository.findByAddress(uri);
 		if (fhirServer.isPresent()) {
 			return fhirServer.get();
 		} else {
-			return saveNewServer(name, serverUrl);
+			return saveNewServer(name, uri);
 		}
 	}
 
 	@Override
-	public FhirServer getOrSaveNewServer(URI serverUrl) {
-		Optional<FhirServer> fhirServer = serverRepository.findByAddress(serverUrl);
+	public FhirServer getOrSaveNewServer(URI uri) {
+		Optional<FhirServer> fhirServer = serverRepository.findByAddress(uri);
 		if (fhirServer.isPresent()) {
 			return fhirServer.get();
 		} else {
-			return saveNewServer(serverUrl.getHost(), serverUrl);
+			return saveNewServer(uri.getHost(), uri);
 		}
 	}
 
 	@Override
-	public void updateServerIdentifier(String oldName, String newName) {
-		log.debug("updating server identifier");
+	public void updateServer(Long id, String name, String uri) {
+		log.debug("updating server");
+		FhirServer server = serverRepository.findById(id)
+				.orElseThrow(() -> new ObjectNotFoundException(id, FhirServer.class.getName()));
+		server.setName(name);
+		server.setUri(uri);
+	}
+
+	@Override
+	public void updateServerName(String oldName, String newName) {
+		log.debug("updating server name");
 		FhirServer server = serverRepository.findByName(oldName)
 				.orElseThrow(() -> new ObjectNotFoundException(oldName, FhirServer.class.getName()));
 		server.setName(newName);
+	}
+
+	@Override
+	public ServerDAO getDAO() {
+		return serverRepository;
 	}
 
 }

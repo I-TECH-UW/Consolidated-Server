@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.ObjectNotFoundException;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.itech.fhir.core.dao.FhirResourceGroupDAO;
@@ -16,13 +17,12 @@ import org.itech.fhir.core.dao.ResourceSearchParamDAO;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.ResourceSearchParam;
 import org.itech.fhir.core.service.FhirResourceGroupService;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGroup, Long>
 		implements FhirResourceGroupService {
-
-	private static final String OE_IDENTIFIER = "3f7d1c6b-2781-4707-847c-03d4cb579470";
 
 	private FhirResourceGroupDAO fhirResourceGroupDAO;
 	private ResourceSearchParamDAO resourceSearchParamsDAO;
@@ -78,23 +78,9 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 
 	}
 
-	private void addOpenMrsBridgeGroup(Set<ResourceSearchParam> resourceSearchParams) {
-		FhirResourceGroup openElisOpenMrsBridge = fhirResourceGroupDAO
-				.save(new FhirResourceGroup("openElisOpenMrsBridge"));
-		resourceSearchParams.add(new ResourceSearchParam(openElisOpenMrsBridge, ResourceType.Task, "status",
-				Arrays.asList(TaskStatus.REQUESTED.toCode())));
-		resourceSearchParams.add(new ResourceSearchParam(openElisOpenMrsBridge, ResourceType.Task, "owner:Practitioner",
-				Arrays.asList(OE_IDENTIFIER)));
-		resourceSearchParams.add(new ResourceSearchParam(openElisOpenMrsBridge, ResourceType.ServiceRequest,
-				"performer:Practitioner", Arrays.asList(OE_IDENTIFIER)));
-	}
-
-	private void addOpenElisInternalGroup(Set<ResourceSearchParam> resourceSearchParams) {
-		FhirResourceGroup openElisInternalFhir = fhirResourceGroupDAO
-				.save(new FhirResourceGroup("openElisInternalApi"));
-		resourceSearchParams.add(new ResourceSearchParam(openElisInternalFhir, ResourceType.Task, "status",
-				Arrays.asList(TaskStatus.REQUESTED.toCode())));
-
+	@Override
+	public List<FhirResourceGroup> getAllFhirGroups() {
+		return fhirResourceGroupDAO.findAll();
 	}
 
 	private Set<ResourceSearchParam> createResourceSearchParams(FhirResourceGroup fhirResourceGroup,
@@ -208,4 +194,12 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		return fhirResourceGroupDAO;
 	}
 
+	@Override
+	public Pair<FhirResourceGroup, Set<ResourceSearchParam>> getFhirGroupToResourceSearchParams(Long fhirGroupId) {
+		FhirResourceGroup fhirResourceGroup = fhirResourceGroupDAO.findById(fhirGroupId)
+				.orElseThrow(() -> new ObjectNotFoundException(fhirGroupId, FhirResourceGroup.class.getName()));
+		Pair<FhirResourceGroup, Set<ResourceSearchParam>> fhirGroupToResourceTypes = Pair.of(fhirResourceGroup,
+				resourceSearchParamsDAO.findAllForFhirResourceGroup(fhirResourceGroup.getId()));
+		return fhirGroupToResourceTypes;
+	}
 }

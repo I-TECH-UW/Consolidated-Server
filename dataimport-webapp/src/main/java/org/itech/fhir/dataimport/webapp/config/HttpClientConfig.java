@@ -1,4 +1,4 @@
-package org.itech.fhir.dataimport.webapp.config;
+package org.itech.fhir.datasubscriber.webapp.config;
 
 import javax.net.ssl.SSLContext;
 
@@ -33,7 +33,6 @@ public class HttpClientConfig {
 	@Value("${server.ssl.key-password}")
 	private String keyPassword;
 
-
 	public SSLConnectionSocketFactory sslConnectionSocketFactory() throws Exception {
 		return new SSLConnectionSocketFactory(sslContext());
 	}
@@ -47,8 +46,9 @@ public class HttpClientConfig {
 	@Bean
 	public CloseableHttpClient httpClient() throws Exception {
 		log.debug("creating httpClient");
-		return HttpClientBuilder.create()//
+		CloseableHttpClient httpClient = HttpClientBuilder.create()//
 				.setSSLSocketFactory(sslConnectionSocketFactory())//
 				.build();
+		return httpClient;
 	}
 }

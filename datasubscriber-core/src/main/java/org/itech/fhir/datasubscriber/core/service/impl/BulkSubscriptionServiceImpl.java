@@ -171,7 +171,7 @@ public class BulkSubscriptionServiceImpl extends CrudServiceImpl<BulkSubscriptio
 				.getAllFhirGroupIdsToResourceSearchParamsGroupedByResourceType().get(fhirResourceGroup.getId()),
 				directSubscription, headers);
 		Optional<Bundle> receivedSubscriptionsBundleOpt = sendSubscriptionsToRemote(subscriptionsBundle,
-				bulk.getSourceServer().getServerUrl());
+				bulk.getSourceServer().getUri());
 
 		if (receivedSubscriptionsBundleOpt.isPresent()) {
 			log.debug("received "
@@ -199,7 +199,7 @@ public class BulkSubscriptionServiceImpl extends CrudServiceImpl<BulkSubscriptio
 
 	// TODO check if delete needs to happen
 	private void removeSubscriptionsFromSourceServer(BulkSubscription bulk) {
-		URI subscribeToUri = bulk.getSourceServer().getServerUrl();
+		URI subscribeToUri = bulk.getSourceServer().getUri();
 		Bundle subscriptionsDeleteBundle = new Bundle();
 		subscriptionsDeleteBundle.setType(BundleType.TRANSACTION);
 		for (String subscriptionLocation : bulk.getSubscriptionLocations().values()) {

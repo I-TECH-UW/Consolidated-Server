@@ -63,8 +63,8 @@ public class DataRequestServiceImpl implements DataRequestService {
 	@Override
 	@Async
 	@Transactional
-	public Future<List<Bundle>> requestDataFromServerSinceLastSucessfulRequest(Long serverId,
-			Long fhirResourceGroupId) throws DataRequestFailedException {
+	public Future<List<Bundle>> requestDataFromServerSinceLastSucessfulRequest(Long serverId, Long fhirResourceGroupId)
+			throws DataRequestFailedException {
 		return requestDataFromServerFromInstant(serverId, fhirResourceGroupId, dataRequestAttemptService
 				.getLatestSuccessInstantForSourceServerAndFhirResourceGroup(serverId, fhirResourceGroupId));
 	}
@@ -118,9 +118,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 			Map<String, List<String>> searchParameters = createSearchParams(resourceSearchParamsSet.getKey(),
 					resourceSearchParamsSet.getValue());
 			IGenericClient sourceFhirClient = fhirContext
-					.newRestfulGenericClient(dataRequestAttempt.getServer().getServerUrl().toString());
-			BasicAuthInterceptor authInterceptor = new BasicAuthInterceptor(basicUsername, basicPassword);
-			sourceFhirClient.registerInterceptor(authInterceptor);
+					.newRestfulGenericClient(dataRequestAttempt.getServer().getUri().toString());
 			Bundle searchBundle = sourceFhirClient//
 					.search()//
 					.forResource(resourceSearchParamsSet.getKey().name())//

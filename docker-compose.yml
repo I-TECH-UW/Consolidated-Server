@@ -1,93 +1,132 @@
 version: '3.3'
-# lines starting with a #db and #port will be uncommented when setup with a docker database
-# lines starting with a #port will be uncommented when setup with a remote database
-# lines starting with a #h will be uncommented when setup with a local database
 services:
-#db    database:
-#db        container_name: openelisglobal-database # don't change
-#db        image: postgres:9.5
-#db        ports:
-#db            - "[% db_host_port %]:5432"
-#db        restart: always
-#db        env_file:
-#db            - [% db_env_dir %]database.env
-#db        volumes:
-#db              # preserves the database between containers
-#db            - [% db_data_dir %]:/var/lib/postgresql/data                
-#db              # files here will run on install
-#db            - [% db_init_dir %]:/docker-entrypoint-initdb.d    
-#db              # values must match values in DatabaseBackup.pl
-#db            - [% db_backups_dir %]:[% docker_backups_dir %]     
+#this is here since we can't just pull a built image from the cloud with our libraries
+  itech-fhir-libraries:
+   image: itech-fhir-libraries
+   build:
+      context: .
+      dockerfile: docker/docker-build/Dockerfile
+      
+  cs-frontend:
+    image: cs-frontend
+    build:
+      context: ./cs-frontend
+      dockerfile: ./Dockerfile    
+    depends_on:
+      - datasubscriber-webapp
+      - dataimport-webapp
+    ports:
+      - 3000:3000
+    networks:
+      - frontend
+      - server-1  
+    volumes:
+      - './cs-frontend:/app'
+      - '/app/node_modules'
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    tty: true
+    
+  dataimport.openelis.org:
+    image: dataimport-webapp
+    build:
+      context: ./dataimport-webapp
+      dockerfile: docker/docker-build/Dockerfile
+    depends_on:
+      - consolidated-server-data
+    ports:
+      - 8083:8080
+    networks:
+      - frontend
+      - server-1
+    secrets:
+      - source: keystore
+      - source: truststore
+      - source: common.properties
+  consolidated-server-data:
+    image: postgres:12-alpine
+    env_file:
+      - ./docker/database.env # configure postgres
+    ports:
+      - 25432:5432
+    volumes:
+      - consolidated-server-data:/var/lib/postgresql/data
+    networks:
+      - frontend
+      - server-1
+      
+  fhir.openelis.org:
+    build: ./hapi-fhir-jpaserver-starter
+    restart: always
+    environment:
+      - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    links:
+      - "hapi-fhir-mysql-1:hapi-fhir-mysql"
+    networks:
+      - frontend
+      - server-1
+    secrets:
+      - source: hapi.properties
+      - source: common.properties
+      - source: keystore
+      - source: truststore
+  hapi-fhir-mysql-1:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'hapi'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'admin'
+      MYSQL_ROOT_PASSWORD: 'admin'
+    networks:
+      - server-1
+    volumes:
+      - hapi-fhir-mysql-1:/var/lib/mysql
+
+  hapi-fhir-jpaserver-start-2:
+    build: ./hapi-fhir-jpaserver-starter
+    restart: always
+    environment:
+      - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
+    ports:
+      - "8081:8080"
+      - "8444:8443"
+    links:
+      - "hapi-fhir-mysql-2:hapi-fhir-mysql"
+    networks:
+      - frontend
+      - server-2
+    secrets:
+      - source: hapi.properties
+      - source: common.properties
+      - source: keystore
+      - source: truststore
+  hapi-fhir-mysql-2:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'hapi'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'admin'
+      MYSQL_ROOT_PASSWORD: 'admin'
+    networks:
+      - server-2
+    volumes:
+      - hapi-fhir-mysql-2:/var/lib/mysql
             
-    oe.openelisci.org:
-        container_name: openelisglobal-webapp # don't change
-        image: openelisglobal
-        depends_on:
-            - datasubscriber.openelisci.org
-#db            - database
-        ports:
-            - "8080:8080"
-            - "8443:8443"
-        restart: always
-        environment:
-              # context.xml doesn't seem to be able to pick up environment variables directly, so we are passing them in as CATALINA_OPTS
-            - CATALINA_OPTS= -Ddatasource.url=jdbc:postgresql://[% db_host %]:[% db_port %]/clinlims?currentSchema=clinlims -Ddatasource.username=clinlims
-        volumes:
-            - [% plugins_dir %]:/var/lib/openelis-global/plugins
-        secrets:
-            - source: keystore
-            - source: truststore
-            - source: datasource.password
-            - source: common.properties
-            
-    hapi-fhir-jpaserver-starter:
-        container_name: hapi-fhir-jpaserver-starter
-        image: hapi-fhir-jpaserver-starter
-#db        depends_on:
-#db            - database
-        ports:
-            - "8081:8080"
-            - "8444:8443"
-        restart: always
-        environment:
-            - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
-        secrets:
-            - source: hapi.properties
-            - source: common.properties
-            - source: keystore
-            - source: truststore
-            
-    datasubscriber.openelisci.org:
-        image: datasubscriber-webapp
-        depends_on:
-            - hapi-fhir-jpaserver-starter
-#db            - database
-        ports:
-            - 8445:8443
-        secrets:
-            - source: keystore
-            - source: truststore
-            - source: common.properties
-            
-    dataimport.openelisci.org:
-        image: dataimport-webapp
-#db        depends_on:
-#db            - database
-        ports:
-            - 8446:8443
-        secrets:
-            - source: keystore
-            - source: truststore
-            - source: common.properties
             
 secrets:
   datasource.password:
-    file: [% secrets_dir %]datasource.password  
+    file: ./datasource.password  
   common.properties:
-    file: [% secrets_dir %]common.properties  
+    file: ./common.properties  
   hapi.properties:
-    file: [% secrets_dir %]hapi.properties
+    file: ./hapi.properties
   keystore:
-    file: /etc/openelis-global/keystore
+    file: ./keystore
   truststore:
-    file: /etc/openelis-global/truststore
+    file: ./truststore
+
