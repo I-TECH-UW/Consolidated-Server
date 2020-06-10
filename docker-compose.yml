@@ -8,21 +8,26 @@ services:
       context: .
       dockerfile: docker/docker-build/Dockerfile
       
-  datasubscriber-webapp:
-    image: datasubscriber-webpapp
+  cs-frontend:
+    image: cs-frontend
     build:
-      context: ./datasubscriber-webapp
-      dockerfile: docker/docker-build/Dockerfile
+      context: ./cs-frontend
+      dockerfile: ./Dockerfile    
     depends_on:
-      - consolidated-server-data
+      - datasubscriber-webapp
+      - dataimport-webapp
     ports:
-      - 8082:8080
-    links:
-      - "consolidated-server-data:datasubscriber-webapp-database"
-      - "hapi-fhir-jpaserver-start-1:hapi-fhir-jpaserver-start"
+      - 3000:3000
     networks:
       - frontend
-      - server-1
+      - server-1  
+    volumes:
+      - './cs-frontend:/app'
+      - '/app/node_modules'
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    tty: true
+    
   dataimport-webapp:
     image: dataimport-webapp
     build:

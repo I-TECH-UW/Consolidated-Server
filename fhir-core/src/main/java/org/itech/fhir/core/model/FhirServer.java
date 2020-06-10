@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 public class FhirServer extends AuditableEntity<Long> {
 
-	private URI serverUrl;
+	private URI uri;
 
 	// persistence
 	@Column(name = "name", unique = true, nullable = false, length = 255)
@@ -32,14 +32,18 @@ public class FhirServer extends AuditableEntity<Long> {
 	FhirServer() {
 	}
 
-	public FhirServer(String name, String serverAddress) {
+	public FhirServer(String name, String uri) {
 		this.name = name;
-		this.serverUrl = URIUtil.createHttpUrlFromString(serverAddress);
+		this.uri = URIUtil.createHttpUrlFromString(uri);
 	}
 
-	public FhirServer(String name, URI serverUrl) {
+	public FhirServer(String name, URI uri) {
 		this.name = name;
-		this.serverUrl = serverUrl;
+		this.uri = uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = URIUtil.createHttpUrlFromString(uri);
 	}
 
 }

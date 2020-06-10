@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.itech.fhir.core.dao.FhirResourceGroupDAO;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.ResourceSearchParam;
+import org.springframework.data.util.Pair;
 
 public interface FhirResourceGroupService extends CrudService<FhirResourceGroup, Long> {
 
@@ -19,7 +20,11 @@ public interface FhirResourceGroupService extends CrudService<FhirResourceGroup,
 		Clinical, Summary, Diagnostics, Medications, Care_Provision, Request_Response
 	}
 
+	List<FhirResourceGroup> getAllFhirGroups();
+
 	Map<FhirResourceGroup, Set<ResourceSearchParam>> getAllFhirGroupsToResourceSearchParams();
+
+	Pair<FhirResourceGroup, Set<ResourceSearchParam>> getFhirGroupToResourceSearchParams(Long fhirGroupId);
 
 	Map<Long, Set<ResourceSearchParam>> getAllFhirGroupIdsToResourceSearchParams();
 

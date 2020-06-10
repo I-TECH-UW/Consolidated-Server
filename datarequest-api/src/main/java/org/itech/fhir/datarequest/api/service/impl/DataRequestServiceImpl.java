@@ -110,7 +110,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 			Map<String, List<String>> searchParameters = createSearchParams(resourceSearchParamsSet.getKey(),
 					resourceSearchParamsSet.getValue());
 			IGenericClient sourceFhirClient = fhirContext
-					.newRestfulGenericClient(dataRequestAttempt.getServer().getServerUrl().toString());
+					.newRestfulGenericClient(dataRequestAttempt.getServer().getUri().toString());
 			Bundle searchBundle = sourceFhirClient//
 					.search()//
 					.forResource(resourceSearchParamsSet.getKey().name())//

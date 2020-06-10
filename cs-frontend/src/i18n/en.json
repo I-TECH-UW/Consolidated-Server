@@ -1,0 +1,9 @@
+{
+	"language.select.label": "Language",
+	"nav.item.home": "Home",
+	"nav.item.about": "About",
+
+	"error.field.required": "Required",
+
+	"error.field.serverName.notunique": "Already in use"
+}

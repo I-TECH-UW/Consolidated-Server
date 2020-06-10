@@ -178,7 +178,7 @@ public class DataForwardNotifyServiceImpl implements DataSaveService {
 
 		List<NameValuePair> postParameters = new ArrayList<>();
 		FhirServer server = serverService.getDAO().findById(sourceServerId).get();
-		postParameters.add(new BasicNameValuePair("serverUrl", server.getServerUrl().toString()));
+		postParameters.add(new BasicNameValuePair("serverUrl", server.getUri().toString()));
 		postParameters.add(new BasicNameValuePair("transactionBundle",
 				fhirContext.newJsonParser().encodeResourceToString(transactionBundle)));
 		postParameters.add(new BasicNameValuePair("transactionResponseBundle",

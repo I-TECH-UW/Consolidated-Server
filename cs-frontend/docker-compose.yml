@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+
+  sample:
+    container_name: sample
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - 3000:80

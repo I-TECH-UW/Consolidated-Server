@@ -8,12 +8,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.ObjectNotFoundException;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.itech.fhir.core.dao.FhirResourceGroupDAO;
 import org.itech.fhir.core.dao.ResourceSearchParamDAO;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.ResourceSearchParam;
 import org.itech.fhir.core.service.FhirResourceGroupService;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +31,7 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		this.fhirResourceGroupDAO = fhirResourceGroupDAO;
 		this.resourceSearchParamsDAO = resourceSearchParamsDAO;
 
-		//this could eventually be moved into a database init script if needed
+		// this could eventually be moved into a database init script if needed
 		if (fhirResourceGroupDAO.count() == 0) {
 			Set<ResourceSearchParam> resourceSearchParams = new HashSet<>();
 
@@ -68,15 +70,19 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 			resourceSearchParams.addAll(createResourceSearchParams(base, baseResourceTypes));
 
 			// put all fhirCategoriesToResourceTypes into the all type
-			FhirResourceGroup all = fhirResourceGroupDAO
-					.save(new FhirResourceGroup(FhirResourceCategories.All.name()));
-			Set<ResourceType> allResourceTypes = resourceSearchParams.stream()
-					.map(ResourceSearchParam::getResourceType).collect(Collectors.toSet());
+			FhirResourceGroup all = fhirResourceGroupDAO.save(new FhirResourceGroup(FhirResourceCategories.All.name()));
+			Set<ResourceType> allResourceTypes = resourceSearchParams.stream().map(ResourceSearchParam::getResourceType)
+					.collect(Collectors.toSet());
 			resourceSearchParams.addAll(createResourceSearchParams(all, allResourceTypes));
 
 			resourceSearchParamsDAO.saveAll(resourceSearchParams);
 		}
 
+	}
+
+	@Override
+	public List<FhirResourceGroup> getAllFhirGroups() {
+		return fhirResourceGroupDAO.findAll();
 	}
 
 	private Set<ResourceSearchParam> createResourceSearchParams(FhirResourceGroup fhirResourceGroup,
@@ -113,7 +119,8 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 	@Override
 	public Map<Long, Map<ResourceType, Set<ResourceSearchParam>>> getAllFhirGroupIdsToResourceSearchParamsGroupedByResourceType() {
 		Map<Long, Map<ResourceType, Set<ResourceSearchParam>>> allFhirGroupsToResourceTypesGrouped = new HashMap<>();
-		allFhirGroupsToResourceTypesGrouped.putAll(groupResourceSearchParams(getAllFhirGroupIdsToResourceSearchParams()));
+		allFhirGroupsToResourceTypesGrouped
+				.putAll(groupResourceSearchParams(getAllFhirGroupIdsToResourceSearchParams()));
 		return allFhirGroupsToResourceTypesGrouped;
 	}
 
@@ -189,4 +196,12 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		return fhirResourceGroupDAO;
 	}
 
+	@Override
+	public Pair<FhirResourceGroup, Set<ResourceSearchParam>> getFhirGroupToResourceSearchParams(Long fhirGroupId) {
+		FhirResourceGroup fhirResourceGroup = fhirResourceGroupDAO.findById(fhirGroupId)
+				.orElseThrow(() -> new ObjectNotFoundException(fhirGroupId, FhirResourceGroup.class.getName()));
+		Pair<FhirResourceGroup, Set<ResourceSearchParam>> fhirGroupToResourceTypes = Pair.of(fhirResourceGroup,
+				resourceSearchParamsDAO.findAllForFhirResourceGroup(fhirResourceGroup.getId()));
+		return fhirGroupToResourceTypes;
+	}
 }
