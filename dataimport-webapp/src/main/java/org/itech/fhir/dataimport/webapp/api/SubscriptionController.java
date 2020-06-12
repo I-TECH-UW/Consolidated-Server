@@ -1,4 +1,4 @@
-package org.itech.fhir.datasubscriber.webapp.web.api;
+package org.itech.fhir.dataimport.webapp.api;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -6,9 +6,9 @@ import java.net.URISyntaxException;
 
 import javax.validation.Valid;
 
+import org.itech.fhir.dataimport.webapp.api.dto.CreateSubscriptionDTO;
 import org.itech.fhir.datasubscriber.core.data.model.BulkSubscription;
 import org.itech.fhir.datasubscriber.core.service.BulkSubscriptionService;
-import org.itech.fhir.datasubscriber.webapp.web.api.dto.CreateSubscriptionDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

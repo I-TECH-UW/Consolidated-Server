@@ -1,6 +1,5 @@
 package org.itech.fhir.core.service.impl;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.itech.fhir.core.dao.FhirResourceGroupDAO;
 import org.itech.fhir.core.dao.ResourceSearchParamDAO;
 import org.itech.fhir.core.model.FhirResourceGroup;
@@ -36,9 +34,6 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		// this could eventually be moved into a database init script if needed
 		if (fhirResourceGroupDAO.count() == 0) {
 			Set<ResourceSearchParam> resourceSearchParams = new HashSet<>();
-
-			addOpenMrsBridgeGroup(resourceSearchParams);
-			addOpenElisInternalGroup(resourceSearchParams);
 
 			FhirResourceGroup entities1 = fhirResourceGroupDAO
 					.save(new FhirResourceGroup(FhirResourceCategories.Entities_1.name()));
@@ -170,6 +165,10 @@ public class FhirResourceGroupServiceImpl extends CrudServiceImpl<FhirResourceGr
 		newResourceGroup = fhirResourceGroupDAO.save(newResourceGroup);
 		for (Entry<ResourceType, Map<String, List<String>>> resourceTypeSearchParams : resourceTypesSearchParams
 				.entrySet()) {
+			if (resourceTypeSearchParams.getValue().isEmpty()) {
+				resourceSearchParamsDAO
+						.save(new ResourceSearchParam(newResourceGroup, resourceTypeSearchParams.getKey()));
+			}
 			for (Entry<String, List<String>> searchParam : resourceTypeSearchParams.getValue().entrySet()) {
 				resourceSearchParamsDAO.save(new ResourceSearchParam(newResourceGroup,
 						resourceTypeSearchParams.getKey(), searchParam.getKey(), searchParam.getValue()));

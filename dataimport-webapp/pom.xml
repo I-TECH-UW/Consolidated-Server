@@ -23,6 +23,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.itech</groupId>
+			<artifactId>datasubscriber-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.itech</groupId>
 			<artifactId>dataimport-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>

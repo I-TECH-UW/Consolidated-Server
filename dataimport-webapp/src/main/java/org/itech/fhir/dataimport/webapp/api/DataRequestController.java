@@ -20,7 +20,7 @@ public class DataRequestController {
 		this.dataImportService = dataImportService;
 	}
 
-	@PostMapping("/server/{serverId}")
+	@PostMapping("/server/{serverId}/**")
 	public void runManualDataImportsForSourceServer(@PathVariable Long serverId)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		dataImportService.importNewDataFromSourceToLocalForServer(serverId);
@@ -32,7 +32,7 @@ public class DataRequestController {
 		runManualDataImportsForSourceServer(serverId);
 	}
 
-	@PostMapping("/dataImportTask/{dataImportTaskId}")
+	@PostMapping("/dataImportTask/{dataImportTaskId}/**")
 	public void runManualDataImports(@PathVariable Long dataImportTaskId)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		dataImportService.importNewDataFromSourceToLocal(dataImportTaskId);

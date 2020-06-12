@@ -1,0 +1,59 @@
+version: '3.3'
+services:
+#this is here since we can't just pull a built image from the cloud with our libraries
+  itech-fhir-libraries:
+   image: itech-fhir-libraries
+   build:
+      context: .
+      dockerfile: docker/docker-build/Dockerfile
+      
+  cs-frontend:
+    image: cs-frontend
+    build:
+      context: ./cs-frontend
+      dockerfile: ./Dockerfile.prod    
+    depends_on:
+      - dataimport.openelis.org
+    ports:
+      - 3000:80
+    
+  dataimport.openelis.org:
+    image: dataimport-webapp
+    build:
+      context: ./dataimport-webapp
+      dockerfile: docker/docker-build/Dockerfile
+    ports:
+      - 8080:8080
+      - 8443:8443
+    volumes:
+      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+    secrets:
+      - source: common.properties
+      - source: keystore
+      - source: truststore
+      
+  fhir.openelis.org:
+    build: ./hapi-fhir-jpaserver-starter
+    restart: always
+    environment:
+      - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
+    ports:
+      - 8444:8443
+    volumes:
+      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+    secrets:
+      - source: common.properties
+      - source: hapi.properties
+      - source: keystore
+      - source: truststore
+
+secrets:
+  common.properties:
+    file: ./prod/properties/common.properties
+  hapi.properties:
+    file: ./prod/properties/hapi.properties
+  keystore:
+    file: ./prod/ssl/oe_selfsigned.keystore
+  truststore:
+    file: ./prod/ssl/oe_selfsigned.truststore
+

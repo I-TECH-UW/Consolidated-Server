@@ -58,11 +58,11 @@ public class BulkSubscriptionServiceImpl extends CrudServiceImpl<BulkSubscriptio
 	private FhirResourceGroupService fhirResourceGroupService;
 	private ServerLockService serverLockService;
 
-	@Value("${org.itech.fhir.datasubscriber.receiver.endpoint}")
+	@Value("${org.itech.fhir.dataimport.receiver.endpoint}")
 	private String receiverEndpoint;
-	@Value("${org.itech.fhir.datasubscriber.receiver.server-id-param-name}")
+	@Value("${org.itech.fhir.dataimport.receiver.server-id-param-name}")
 	private String sourceServerIdParamName;
-	@Value("${org.itech.fhir.datasubscriber.receiver.resource-path-param-name}")
+	@Value("${org.itech.fhir.dataimport.receiver.resource-path-param-name}")
 	private String resourcePathParamName;
 
 	public BulkSubscriptionServiceImpl(ServerService serverService, BulkSubscriptionDAO bulkSubscriptionDAO,

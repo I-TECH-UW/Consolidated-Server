@@ -1,4 +1,4 @@
-package org.itech.fhir.datasubscriber.webapp.web.api;
+package org.itech.fhir.dataimport.webapp.api;
 
 import java.io.IOException;
 import java.net.URI;

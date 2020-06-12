@@ -1,4 +1,4 @@
-package org.itech.fhir.datasubscriber.webapp.web.api.dto;
+package org.itech.fhir.dataimport.webapp.api.dto;
 
 import java.net.URI;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.itech.fhir.datasubscriber.webapp.config;
+package org.itech.fhir.dataimport.webapp.config;
 
 import javax.net.ssl.SSLContext;
 

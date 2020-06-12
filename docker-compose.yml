@@ -1,6 +1,7 @@
 version: '3.3'
 services:
-#this is here since we can't just pull a built image from the cloud with our libraries
+
+   #this is here since we can't just pull a built image from the cloud with our libraries
   itech-fhir-libraries:
    image: itech-fhir-libraries
    build:
@@ -12,9 +13,8 @@ services:
     build:
       context: ./cs-frontend
       dockerfile: ./Dockerfile    
-    depends_on:
-      - datasubscriber-webapp
-      - dataimport-webapp
+#    depends_on:
+#      - DATAIMPORt.openelis.org
     ports:
       - 3000:3000
     networks:
@@ -27,6 +27,18 @@ services:
       - CHOKIDAR_USEPOLLING=true
     tty: true
     
+  consolidated-server-data:
+    image: postgres:12-alpine
+    env_file:
+      - ./dev/database/database.env # configure postgres
+    ports:
+      - 25432:5432
+    volumes:
+      - consolidated-server-data:/var/lib/postgresql/data
+    networks:
+      - frontend
+      - server-1
+    
   dataimport.openelis.org:
     image: dataimport-webapp
     build:
@@ -35,25 +47,17 @@ services:
     depends_on:
       - consolidated-server-data
     ports:
-      - 8083:8080
+      - 8080:8080
+      - 8443:8443
     networks:
       - frontend
       - server-1
+    volumes:
+      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
+      - source: common.properties
       - source: keystore
       - source: truststore
-      - source: common.properties
-  consolidated-server-data:
-    image: postgres:12-alpine
-    env_file:
-      - ./docker/database.env # configure postgres
-    ports:
-      - 25432:5432
-    volumes:
-      - consolidated-server-data:/var/lib/postgresql/data
-    networks:
-      - frontend
-      - server-1
       
   fhir.openelis.org:
     build: ./hapi-fhir-jpaserver-starter
@@ -61,72 +65,56 @@ services:
     environment:
       - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
     ports:
-      - "8080:8080"
-      - "8443:8443"
-    links:
-      - "hapi-fhir-mysql-1:hapi-fhir-mysql"
+      - 8444:8443
     networks:
       - frontend
-      - server-1
+      - server-1  
+    volumes:
+      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
-      - source: hapi.properties
       - source: common.properties
+      - source: hapi.properties
       - source: keystore
       - source: truststore
-  hapi-fhir-mysql-1:
-    image: mysql:latest
-    restart: always
-    environment:
-      MYSQL_DATABASE: 'hapi'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: 'admin'
-      MYSQL_ROOT_PASSWORD: 'admin'
-    networks:
-      - server-1
-    volumes:
-      - hapi-fhir-mysql-1:/var/lib/mysql
 
-  hapi-fhir-jpaserver-start-2:
+
+  fhir2.openelis.org:
     build: ./hapi-fhir-jpaserver-starter
     restart: always
     environment:
-      - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
+      - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi2.properties
     ports:
-      - "8081:8080"
-      - "8444:8443"
-    links:
-      - "hapi-fhir-mysql-2:hapi-fhir-mysql"
+      - 8082:8080
+      - 8445:8443
     networks:
       - frontend
       - server-2
+    volumes:
+      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
-      - source: hapi.properties
       - source: common.properties
+      - source: hapi2.properties
       - source: keystore
       - source: truststore
-  hapi-fhir-mysql-2:
-    image: mysql:latest
-    restart: always
-    environment:
-      MYSQL_DATABASE: 'hapi'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: 'admin'
-      MYSQL_ROOT_PASSWORD: 'admin'
-    networks:
-      - server-2
-    volumes:
-      - hapi-fhir-mysql-2:/var/lib/mysql
-            
-            
+     
+
+networks:
+  frontend:
+  server-1:
+  server-2:
+  
+volumes:
+  consolidated-server-data:
+  
 secrets:
-  datasource.password:
-    file: ./datasource.password  
   common.properties:
-    file: ./common.properties  
+    file: ./dev/properties/common.properties
   hapi.properties:
-    file: ./hapi.properties
+    file: ./dev/properties/hapi.properties
+  hapi2.properties:
+    file: ./dev/properties/hapi2.properties
   keystore:
-    file: ./keystore
+    file: ./dev/ssl/oe_selfsigned.keystore
   truststore:
-    file: ./truststore
+    file: ./dev/ssl/oe_selfsigned.truststore
 

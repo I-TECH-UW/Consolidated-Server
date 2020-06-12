@@ -13,7 +13,6 @@ import java.util.concurrent.Future;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.itech.fhir.core.dao.ServerResourceIdMapDAO;
 import org.itech.fhir.core.model.ResourceSearchParam;
 import org.itech.fhir.core.service.FhirResourceGroupService;
 import org.itech.fhir.core.service.ServerService;
@@ -23,7 +22,6 @@ import org.itech.fhir.datarequest.core.exception.DataRequestFailedException;
 import org.itech.fhir.datarequest.core.model.DataRequestAttempt;
 import org.itech.fhir.datarequest.core.model.DataRequestAttempt.DataRequestStatus;
 import org.itech.fhir.datarequest.core.service.DataRequestAttemptService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -31,18 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class DataRequestServiceImpl implements DataRequestService {
-
-	@Value("${basicUsername}")
-	private String basicUsername;
-	@Value("${basicPassword}")
-	private String basicPassword;
 
 	private ServerService serverService;
 	private DataRequestAttemptService dataRequestAttemptService;
@@ -52,7 +44,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 
 	public DataRequestServiceImpl(ServerService serverService, DataRequestAttemptService dataRequestAttemptService,
 			DataRequestAttemptStatusService dataRequestStatusService, FhirContext fhirContext,
-			FhirResourceGroupService fhirResourceGroupService, ServerResourceIdMapDAO sourceIdToLocalIdDAO) {
+			FhirResourceGroupService fhirResourceGroupService) {
 		this.serverService = serverService;
 		this.dataRequestAttemptService = dataRequestAttemptService;
 		this.dataRequestStatusService = dataRequestStatusService;

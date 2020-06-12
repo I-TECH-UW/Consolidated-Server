@@ -13,10 +13,13 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.base.PersistenceEntity;
+import org.itech.fhir.dataimport.core.model.converter.DataImportStatusConverter;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 public class DataImportAttempt extends PersistenceEntity<Long> {
 

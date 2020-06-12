@@ -15,11 +15,8 @@ public class URIUtil {
 
 	public static URI createHttpUrlFromString(String url) {
 		log.debug("creating http url from \"" + url + "\"");
-		if (!url.startsWith("http://")) {
-			url = "http://" + url;
-		}
 		return UriComponentsBuilder.fromUriString(url)
-				.scheme("http")
+				.scheme("https")
 				.build().toUri();
 	}
 

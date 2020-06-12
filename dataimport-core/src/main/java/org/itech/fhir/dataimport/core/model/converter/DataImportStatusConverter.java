@@ -1,4 +1,4 @@
-package org.itech.fhir.dataimport.core.model;
+package org.itech.fhir.dataimport.core.model.converter;
 
 import java.util.stream.Stream;
 
