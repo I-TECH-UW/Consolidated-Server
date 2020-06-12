@@ -13,8 +13,8 @@ services:
     build:
       context: ./cs-frontend
       dockerfile: ./Dockerfile    
-#    depends_on:
-#      - DATAIMPORt.openelis.org
+    depends_on:
+      - dataimport.openelis.org
     ports:
       - 3000:3000
     networks:
