@@ -1,4 +1,4 @@
-package org.itech.fhir.core.web.dto;
+package org.itech.fhir.dataimport.webapp.api.dto;
 
 import javax.validation.constraints.NotBlank;
 

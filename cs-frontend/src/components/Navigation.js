@@ -36,9 +36,9 @@ class Navigation extends React.Component {
                     }`}
                 >
                   <Link className="nav-link" to="/">
-                      <FormattedMessage id="nav.item.home"
-                        defaultMessage="Home"
-                        description="Go to home page" />
+                    <FormattedMessage id="nav.item.home"
+                      defaultMessage="Home"
+                      description="Go to home page" />
                     <span className="sr-only">(current)</span>
                   </Link>
                 </li>
@@ -48,9 +48,9 @@ class Navigation extends React.Component {
                     }`}
                 >
                   <Link className="nav-link" to="/about">
-                      <FormattedMessage id="nav.item.about"
-                        defaultMessage="About"
-                        description="Go to about page" />
+                    <FormattedMessage id="nav.item.about"
+                      defaultMessage="About"
+                      description="Go to about page" />
                   </Link>
                 </li>
                 <li
@@ -59,23 +59,26 @@ class Navigation extends React.Component {
                     }`}
                 >
                   <Link className="nav-link" to="/server">
-                      <FormattedMessage id="nav.item.server"
-                        defaultMessage="Server"
-                        description="Go to server page" />
+                    <FormattedMessage id="nav.item.server"
+                      defaultMessage="Server"
+                      description="Go to server page" />
                   </Link>
                 </li>
-                <li
+                {/* TODO add this once we can edit resource groups through the app */}
+                {/* <li
                   className={`nav-item  ${
                     this.props.location.pathname === "/resourceGroup" ? "active" : ""
                     }`}
                 >
                   <Link className="nav-link" to="/resourceGroup">
-                      <FormattedMessage id="nav.item.resourceGroup"
-                        defaultMessage="Resource Group"
-                        description="Go to resource group page" />
+                    <FormattedMessage id="nav.item.resourceGroup"
+                      defaultMessage="Resource Group"
+                      description="Go to resource group page" />
                   </Link>
-                </li>
-                <li >
+                </li> */}
+
+                {/* TODO add this back when/if we want to do internationalization */}
+                {/* <li >
                   <div className="dropdown">
                     <button type="button" className="btn btn-dark" data-toggle="dropdown">
                       <FontAwesomeIcon icon={faLanguage} style={{ color: 'grey' }} size="2x" />
@@ -85,7 +88,7 @@ class Navigation extends React.Component {
                       <a className="dropdown-item" lang="fr" onClick={this.props.onChangeLanguage}>Français</a>
                     </div>
                   </div>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>

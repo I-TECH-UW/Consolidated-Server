@@ -1,4 +1,4 @@
-package org.itech.fhir.core.web.api;
+package org.itech.fhir.dataimport.webapp.api;
 
 import java.util.Collections;
 import java.util.Map;
@@ -9,7 +9,9 @@ import javax.validation.Valid;
 import org.hibernate.ObjectNotFoundException;
 import org.itech.fhir.core.model.FhirServer;
 import org.itech.fhir.core.service.ServerService;
-import org.itech.fhir.core.web.dto.CreateServerDTO;
+import org.itech.fhir.dataimport.webapp.api.dto.CreateServerDTO;
+import org.itech.fhir.dataimport.webapp.api.dto.FhirServerDTO;
+import org.itech.fhir.dataimport.webapp.api.transform.FhirServerTransformService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,29 +27,31 @@ import org.springframework.web.bind.annotation.RestController;
 public class ServerController {
 
 	private ServerService serverService;
+	private FhirServerTransformService fhirServerTransformService;
 
-	public ServerController(ServerService serverService) {
+	public ServerController(ServerService serverService, FhirServerTransformService fhirServerTransformService) {
 		this.serverService = serverService;
+		this.fhirServerTransformService = fhirServerTransformService;
 	}
 
 
 	@GetMapping
-	public ResponseEntity<Iterable<FhirServer>> getServers() {
-		return ResponseEntity.ok(serverService.getDAO().findAll());
+	public ResponseEntity<Iterable<FhirServerDTO>> getServers() {
+		return ResponseEntity.ok(fhirServerTransformService.getAsDTO(serverService.getDAO().findAll()));
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<FhirServer> getServer(@PathVariable(value = "id") Long id) {
+	public ResponseEntity<FhirServerDTO> getServer(@PathVariable(value = "id") Long id) {
 		FhirServer server = serverService.getDAO().findById(id)
 				.orElseThrow(() -> new ObjectNotFoundException(id, FhirServer.class.getName()));
-		return ResponseEntity.ok(server);
+		return ResponseEntity.ok(fhirServerTransformService.getAsDTO(server));
 	}
 
 	@GetMapping(value = "/name/{name}")
-	public ResponseEntity<FhirServer> getServerByName(@PathVariable(value = "name") String name) {
+	public ResponseEntity<FhirServerDTO> getServerByName(@PathVariable(value = "name") String name) {
 		FhirServer server = serverService.getDAO().findByName(name)
 				.orElseThrow(() -> new ObjectNotFoundException(name, FhirServer.class.getName()));
-		return ResponseEntity.ok(server);
+		return ResponseEntity.ok(fhirServerTransformService.getAsDTO(server));
 	}
 
 	@GetMapping(value = "/name/{name}/available")
@@ -74,9 +78,9 @@ public class ServerController {
 	}
 
 	@PostMapping
-	public ResponseEntity<FhirServer> createServer(@RequestBody @Valid CreateServerDTO dto) {
+	public ResponseEntity<FhirServerDTO> createServer(@RequestBody @Valid CreateServerDTO dto) {
 		FhirServer newServer = serverService.saveNewServer(dto.getServerName(), dto.getServerUri());
-		return ResponseEntity.ok(newServer);
+		return ResponseEntity.ok(fhirServerTransformService.getAsDTO(newServer));
 	}
 
 	@PutMapping(value = "/{id}")

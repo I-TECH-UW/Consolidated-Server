@@ -23,6 +23,9 @@ services:
     volumes:
       - './cs-frontend:/app'
       - '/app/node_modules'
+    secrets:
+      - source: cert
+      - source: key
     environment:
       - CHOKIDAR_USEPOLLING=true
     tty: true
@@ -114,7 +117,11 @@ secrets:
   hapi2.properties:
     file: ./dev/properties/hapi2.properties
   keystore:
-    file: ./dev/ssl/oe_selfsigned.keystore
+    file: ./dev/ssl/oeselfsigned.keystore
   truststore:
-    file: ./dev/ssl/oe_selfsigned.truststore
+    file: ./dev/ssl/oeselfsigned.truststore
+  cert:
+    file: ./dev/ssl/oeselfsigned.crt
+  key:
+    file: ./dev/ssl/oeselfsigned.key
 

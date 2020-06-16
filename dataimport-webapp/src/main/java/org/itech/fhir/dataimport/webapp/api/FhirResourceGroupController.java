@@ -1,4 +1,4 @@
-package org.itech.fhir.core.web.api;
+package org.itech.fhir.dataimport.webapp.api;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,7 +12,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.ResourceSearchParam;
 import org.itech.fhir.core.service.FhirResourceGroupService;
-import org.itech.fhir.core.web.dto.CustomFhirResourceGroupDTO;
+import org.itech.fhir.dataimport.webapp.api.dto.CustomFhirResourceGroupDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

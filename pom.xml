@@ -16,7 +16,6 @@
 
 	<modules>
 		<module>fhir-core</module>
-		<module>fhir-webapi</module>
 		<module>datasubscriber-core</module>
 		<module>datarequest-core</module>
 		<module>datarequest-api</module>

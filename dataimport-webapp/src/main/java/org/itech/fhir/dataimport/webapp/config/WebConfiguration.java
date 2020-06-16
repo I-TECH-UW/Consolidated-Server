@@ -8,8 +8,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfiguration implements WebMvcConfigurer {
 
 	@Override
+	// TODO remove the allow credentials once a proper authentication server can be
+	// created
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedMethods("*");
+		registry.addMapping("/**").allowedOrigins("https://host.openelis.org:3000").allowedMethods("*")
+				.allowCredentials(true);
 	}
 
 }

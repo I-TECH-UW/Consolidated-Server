@@ -33,8 +33,12 @@ class EditResourceGroup extends React.Component {
 
 	async componentDidMount() {
 		if (this.props.match.params.id !== 'new') {
-			const resourceGroup = await (await fetch(`http://localhost:8083/fhirResourceGroup/${this.props.match.params.id}`)).json();
-			const resourceSearchParams = await (await fetch(`http://localhost:8083/fhirResourceGroup/${this.props.match.params.id}/resourceSearchParams`)).json();
+			const resourceGroup = await (await fetch(`https://host.openelis.org:8443/fhirResourceGroup/${this.props.match.params.id}`), {
+				credentials: 'include'
+			}).json();
+			const resourceSearchParams = await (await fetch(`https://host.openelis.org:8443/fhirResourceGroup/${this.props.match.params.id}/resourceSearchParams`), {
+				credentials: 'include'
+			}).json();
 			const searchParams = {};
 			for (var i = 0; i < resourceSearchParams.length; i++) {
 				let resourceSearchParam = resourceSearchParams[i];
@@ -108,12 +112,12 @@ class EditResourceGroup extends React.Component {
 	// 	let resourceGroupNameFilled = resourceGroupName.length > 0;
 	// 	let newResourceGroup = this.state.resourceGroup.id.length === 0;
 	// 	if ( alreadyChecked && resourceGroupNameFilled && newResourceGroup) {
-	// 		fetch(`http://localhost:8083/resourceGroup/name/${resourceGroupName}/available`)
+	// 		fetch(`https://host.openelis.org:8443/resourceGroup/name/${resourceGroupName}/available`)
 	// 			.then((response) => response.json())
 	// 			.then((json) => { this.processResourceGroupNameCheck(resourceGroupName, json.response); });
 	// 		this.lastNameChecked = resourceGroupName;
 	// 	} else if (alreadyChecked && resourceGroupNameFilled) {
-	// 		fetch(`http://localhost:8083/resourceGroup/${this.state.resourceGroup.id}/name/${resourceGroupName}/available`)
+	// 		fetch(`https://host.openelis.org:8443/resourceGroup/${this.state.resourceGroup.id}/name/${resourceGroupName}/available`)
 	// 			.then((response) => response.json())
 	// 			.then((json) => { this.processResourceGroupNameCheck(resourceGroupName, json.response); });
 	// 		this.lastNameChecked = resourceGroupName;
@@ -138,13 +142,14 @@ class EditResourceGroup extends React.Component {
 		object.resourceTypesSearchParams = this.state.resourceGroup.resourceSearchParams;
 		var json = JSON.stringify(object);
 		console.log(json);
-		fetch('http://localhost:8083/resourceGroup/', {
+		fetch('https://host.openelis.org:8443/resourceGroup/', {
 			method: 'POST',
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: json
+			body: json,
+			credentials: 'include'
 		}).then(this.props.history.push('/resourceGroup'));
 	}
 

@@ -73,6 +73,7 @@ public class DataImportTaskServiceImpl extends CrudServiceImpl<DataImportTask, L
 		return dataImportTaskDAO.save(dataImportTask);
 	}
 
+
 	@Override
 	public Instant getLatestSuccessInstantForDataImportTask(DataImportTask dataImportTask) {
 		Instant lastSuccess = Instant.EPOCH;

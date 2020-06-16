@@ -16,7 +16,9 @@ class ResourceGroups extends React.Component {
 
 
 	async componentDidMount() {
-		const response = await fetch('http://localhost:8083/fhirResourceGroup/');
+		const response = await fetch('https://host.openelis.org:8443/fhirResourceGroup/', {
+			credentials: 'include'
+		});
 		const body = await response.json();
 		this.setState({ resourceGroups: body, isLoading: false });
 	}

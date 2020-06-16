@@ -31,9 +31,13 @@ class EditServer extends React.Component {
 
 	async componentDidMount() {
 		if (this.props.match.params.id !== 'new') {
-			let response = await fetch(`http://localhost:8083/server/${this.props.match.params.id}`)
+			let response = await fetch(`https://host.openelis.org:8443/server/${this.props.match.params.id}`, {
+				credentials: 'include'
+			})
 			const server = await (response).json();
-			response = await fetch(`http://localhost:8083/dataImportTask/server/${this.props.match.params.id}`);
+			response = await fetch(`https://host.openelis.org:8443/dataImportTask/server/${this.props.match.params.id}`, {
+				credentials: 'include'
+			});
 			if (response.ok) {
 				const dataImportTask = await (response).json();
 				server.dataImportTask = dataImportTask;
@@ -105,12 +109,16 @@ class EditServer extends React.Component {
 		let serverNameFilled = serverName.length > 0;
 		let newServer = this.state.server.id.length === 0;
 		if (alreadyChecked && serverNameFilled && newServer) {
-			fetch(`http://localhost:8083/server/name/${serverName}/available`)
+			fetch(`https://host.openelis.org:8443/server/name/${serverName}/available`, {
+				credentials: 'include'
+			})
 				.then((response) => response.json())
 				.then((json) => { this.processServerNameCheck(serverName, json.response); });
 			this.lastNameChecked = serverName;
 		} else if (alreadyChecked && serverNameFilled) {
-			fetch(`http://localhost:8083/server/${this.state.server.id}/name/${serverName}/available`)
+			fetch(`https://host.openelis.org:8443/server/${this.state.server.id}/name/${serverName}/available`, {
+				credentials: 'include'
+			})
 				.then((response) => response.json())
 				.then((json) => { this.processServerNameCheck(serverName, json.response); });
 			this.lastNameChecked = serverName;
@@ -136,13 +144,14 @@ class EditServer extends React.Component {
 		formData.forEach((value, key) => { object[key] = value });
 		var json = JSON.stringify(object);
 		console.log(json);
-		fetch('http://localhost:8083/server/', {
+		fetch('https://host.openelis.org:8443/server/', {
 			method: 'POST',
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: json
+			body: json,
+			credentials: 'include'
 		}).then(this.props.history.push('/server'));
 	}
 
