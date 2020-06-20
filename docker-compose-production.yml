@@ -15,7 +15,10 @@ services:
     depends_on:
       - dataimport.openelis.org
     ports:
-      - 3000:80
+      - 443:443
+    secrets:
+      - source: cert
+      - source: key
     
   dataimport.openelis.org:
     image: dataimport-webapp
@@ -26,7 +29,7 @@ services:
       - 8080:8080
       - 8443:8443
     volumes:
-      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+      - ./prod/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
       - source: common.properties
       - source: keystore
@@ -40,7 +43,7 @@ services:
     ports:
       - 8444:8443
     volumes:
-      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+      - ./prod/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
       - source: common.properties
       - source: hapi.properties
@@ -56,4 +59,8 @@ secrets:
     file: ./prod/ssl/oe_selfsigned.keystore
   truststore:
     file: ./prod/ssl/oe_selfsigned.truststore
+  cert:
+    file: ./prod/ssl/openelis.org.crt
+  key:
+    file: ./prod/ssl/openelis.org.key
 

@@ -41,11 +41,11 @@ public class DataImportStatusServiceImpl implements DataImportStatusService {
 			break;
 		case REQUESTED:
 			break;
-		case SAVING:
+		case PERSISTING:
 			break;
-		case COMPLETE:
+		case SUCCEEDED:
 		case FAILED:
-		case TIMED_OUT:
+		case INCOMPLETE:
 		case NOT_RAN:
 			dataImportAttempt.setEndTime(Instant.now());
 		}

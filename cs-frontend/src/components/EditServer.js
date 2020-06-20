@@ -31,11 +31,21 @@ class EditServer extends React.Component {
 
 	async componentDidMount() {
 		if (this.props.match.params.id !== 'new') {
-			let response = await fetch(`https://host.openelis.org:8443/server/${this.props.match.params.id}`, {
+			let response = await fetch(`$${process.env.REACT_APP_DATA_IMPORT_API}/server/${this.props.match.params.id}`, {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${localStorage.getItem("react-token")}`,
+			},
 				credentials: 'include'
 			})
 			const server = await (response).json();
-			response = await fetch(`https://host.openelis.org:8443/dataImportTask/server/${this.props.match.params.id}`, {
+			response = await fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/dataImportTask/server/${this.props.match.params.id}`, {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${localStorage.getItem("react-token")}`,
+			},
 				credentials: 'include'
 			});
 			if (response.ok) {
@@ -109,14 +119,24 @@ class EditServer extends React.Component {
 		let serverNameFilled = serverName.length > 0;
 		let newServer = this.state.server.id.length === 0;
 		if (alreadyChecked && serverNameFilled && newServer) {
-			fetch(`https://host.openelis.org:8443/server/name/${serverName}/available`, {
+			fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/server/name/${serverName}/available`, {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${localStorage.getItem("react-token")}`,
+			},
 				credentials: 'include'
 			})
 				.then((response) => response.json())
 				.then((json) => { this.processServerNameCheck(serverName, json.response); });
 			this.lastNameChecked = serverName;
 		} else if (alreadyChecked && serverNameFilled) {
-			fetch(`https://host.openelis.org:8443/server/${this.state.server.id}/name/${serverName}/available`, {
+			fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/server/${this.state.server.id}/name/${serverName}/available`, {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${localStorage.getItem("react-token")}`,
+			},
 				credentials: 'include'
 			})
 				.then((response) => response.json())
@@ -144,11 +164,12 @@ class EditServer extends React.Component {
 		formData.forEach((value, key) => { object[key] = value });
 		var json = JSON.stringify(object);
 		console.log(json);
-		fetch('https://host.openelis.org:8443/server/', {
+		fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/server/`, {
 			method: 'POST',
 			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json'
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${localStorage.getItem("react-token")}`,
 			},
 			body: json,
 			credentials: 'include'

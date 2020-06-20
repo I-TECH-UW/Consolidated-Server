@@ -16,7 +16,12 @@ class Servers extends React.Component {
 
 
 	async componentDidMount() {
-		const response = await fetch('https://host.openelis.org:8443/server/', {
+		const response = await fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/server/`, {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${localStorage.getItem("react-token")}`,
+			},
 			credentials: 'include'
 		});
 		const body = await response.json();
@@ -28,11 +33,12 @@ class Servers extends React.Component {
 			return;
 		}
 
-		await fetch(`https://host.openelis.org:8443/server/${server.id}`, {
+		await fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/server/${server.id}`, {
 			method: 'DELETE',
 			headers: {
 				'Accept': 'application/json',
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${localStorage.getItem("react-token")}`,
 			},
 			credentials: 'include'
 		}).then(() => {

@@ -2,11 +2,11 @@ version: '3.3'
 services:
 
    #this is here since we can't just pull a built image from the cloud with our libraries
-  itech-fhir-libraries:
-   image: itech-fhir-libraries
-   build:
-      context: .
-      dockerfile: docker/docker-build/Dockerfile
+#  itech-fhir-libraries:
+#   image: itech-fhir-libraries
+#   build:
+#      context: .
+#      dockerfile: docker/docker-build/Dockerfile
       
   cs-frontend:
     image: cs-frontend
@@ -38,6 +38,7 @@ services:
       - 25432:5432
     volumes:
       - consolidated-server-data:/var/lib/postgresql/data
+      - ./dev/database/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
     networks:
       - frontend
       - server-1
@@ -58,7 +59,6 @@ services:
     volumes:
       - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
-      - source: common.properties
       - source: keystore
       - source: truststore
       
@@ -99,6 +99,29 @@ services:
       - source: hapi2.properties
       - source: keystore
       - source: truststore
+      
+  auth.openelis.org:
+    image:
+      quay.io/keycloak/keycloak:10.0.2
+    restart: always
+    environment:
+      - DB_VENDOR=postgres
+      - DB_ADDR=consolidated-server-data
+      - DB_PORT=5432
+      - DB_DATABASE=consolidated-server
+      - DB_SCHEMA=keycloak
+      - DB_USER=cs_user
+      - DB_PASSWORD=cs_password
+    ports:
+      - 8083:8080
+      - 8446:8443
+    networks:
+      - frontend
+      - server-1
+    volumes:
+      - ./dev/ssl/openelis.org.crt:/etc/x509/https/tls.crt
+      - ./dev/ssl/openelis.org.key:/etc/x509/https/tls.key
+      
      
 
 networks:
@@ -117,11 +140,11 @@ secrets:
   hapi2.properties:
     file: ./dev/properties/hapi2.properties
   keystore:
-    file: ./dev/ssl/oeselfsigned.keystore
+    file: ./dev/ssl/oe_selfsigned.keystore
   truststore:
-    file: ./dev/ssl/oeselfsigned.truststore
+    file: ./dev/ssl/oe_selfsigned.truststore
   cert:
-    file: ./dev/ssl/oeselfsigned.crt
+    file: ./dev/ssl/oe_selfsigned.crt
   key:
-    file: ./dev/ssl/oeselfsigned.key
+    file: ./dev/ssl/oe_selfsigned.key
 

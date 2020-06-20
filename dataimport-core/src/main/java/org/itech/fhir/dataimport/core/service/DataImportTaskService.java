@@ -24,4 +24,5 @@ public interface DataImportTaskService extends CrudService<DataImportTask, Long>
 	Instant getLatestSuccessInstantForDataImportTask(DataImportTask dataImportTask);
 
 	Instant getLatestInstantForDataImportTask(DataImportTask dataImportTask);
+
 }

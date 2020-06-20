@@ -1,16 +1,19 @@
 package org.itech.fhir.datarequest.api.service.impl;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.itech.fhir.core.model.ResourceSearchParam;
@@ -18,16 +21,20 @@ import org.itech.fhir.core.service.FhirResourceGroupService;
 import org.itech.fhir.core.service.ServerService;
 import org.itech.fhir.datarequest.api.service.DataRequestAttemptStatusService;
 import org.itech.fhir.datarequest.api.service.DataRequestService;
+import org.itech.fhir.datarequest.core.dao.IncompleteDataRequestDAO;
 import org.itech.fhir.datarequest.core.exception.DataRequestFailedException;
 import org.itech.fhir.datarequest.core.model.DataRequestAttempt;
 import org.itech.fhir.datarequest.core.model.DataRequestAttempt.DataRequestStatus;
+import org.itech.fhir.datarequest.core.model.IncompleteDataRequest;
 import org.itech.fhir.datarequest.core.service.DataRequestAttemptService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +45,20 @@ public class DataRequestServiceImpl implements DataRequestService {
 
 	private ServerService serverService;
 	private DataRequestAttemptService dataRequestAttemptService;
+	private IncompleteDataRequestDAO incompleteDataRequestDAO;
 	private DataRequestAttemptStatusService dataRequestStatusService;
 	private FhirContext fhirContext;
 	private FhirResourceGroupService fhirResourceGroupService;
 
+	@Value("${org.itech.fhir.search.page.max:50}")
+	private int searchPageMax;
+
 	public DataRequestServiceImpl(ServerService serverService, DataRequestAttemptService dataRequestAttemptService,
-			DataRequestAttemptStatusService dataRequestStatusService, FhirContext fhirContext,
-			FhirResourceGroupService fhirResourceGroupService) {
+			IncompleteDataRequestDAO incompleteDataRequestDAO, DataRequestAttemptStatusService dataRequestStatusService,
+			FhirContext fhirContext, FhirResourceGroupService fhirResourceGroupService) {
 		this.serverService = serverService;
 		this.dataRequestAttemptService = dataRequestAttemptService;
+		this.incompleteDataRequestDAO = incompleteDataRequestDAO;
 		this.dataRequestStatusService = dataRequestStatusService;
 		this.fhirContext = fhirContext;
 		this.fhirResourceGroupService = fhirResourceGroupService;
@@ -82,9 +94,6 @@ public class DataRequestServiceImpl implements DataRequestService {
 			Long fhirResourceGroupId, DateRangeParam dateRange) throws DataRequestFailedException {
 		try {
 			List<Bundle> searchBundles = getResourceBundlesFromSourceServer(dataRequestAttempt, dateRange);
-			dataRequestStatusService.changeDataRequestAttemptStatus(dataRequestAttempt.getId(),
-					DataRequestStatus.COMPLETE);
-			log.debug("finished sending request for server " + dataRequestAttempt.getId());
 			return searchBundles;
 		} catch (RuntimeException e) {
 			log.warn("exception occured while running dataRequest task", e);
@@ -105,26 +114,68 @@ public class DataRequestServiceImpl implements DataRequestService {
 		List<Bundle> searchBundles = new ArrayList<>();
 		dataRequestStatusService.changeDataRequestAttemptStatus(dataRequestAttempt.getId(),
 				DataRequestStatus.REQUESTED);
+		boolean timedOut = false;
+		Set<ResourceType> unfetchedResources = new HashSet<>();
 		for (Entry<ResourceType, Set<ResourceSearchParam>> resourceSearchParamsSet : fhirResourcesMap
 				.get(dataRequestAttempt.getFhirResourceGroup().getId()).entrySet()) {
-			Map<String, List<String>> searchParameters = createSearchParams(resourceSearchParamsSet.getKey(),
-					resourceSearchParamsSet.getValue());
-			IGenericClient sourceFhirClient = fhirContext
-					.newRestfulGenericClient(dataRequestAttempt.getServer().getUri().toString());
-			Bundle searchBundle = sourceFhirClient//
-					.search()//
-					.forResource(resourceSearchParamsSet.getKey().name())//
-					.whereMap(searchParameters)//
-					.lastUpdated(dateRange)//
-					.returnBundle(Bundle.class).execute();
-			log.trace("received json " + fhirContext.newJsonParser().encodeResourceToString(searchBundle));
-			log.debug("received " + searchBundle.getTotal() + " entries of " + resourceSearchParamsSet.getKey());
-			searchBundles.add(searchBundle);
-			if (Thread.currentThread().isInterrupted()) {
-				return searchBundles;
+			if (!timedOut) {
+				timedOut = searchForResourceType(dataRequestAttempt.getServer().getUri(), resourceSearchParamsSet,
+						dateRange, searchBundles).equals(DataRequestStatus.FAILED);
+			}
+			if (timedOut) {
+				unfetchedResources.add(resourceSearchParamsSet.getKey());
 			}
 		}
+		if (!timedOut) {
+			dataRequestStatusService.changeDataRequestAttemptStatus(dataRequestAttempt.getId(),
+					DataRequestStatus.SUCCEEDED);
+			log.debug("finished sending request for server " + dataRequestAttempt.getId());
+		} else {
+			dataRequestStatusService.changeDataRequestAttemptStatus(dataRequestAttempt.getId(),
+					DataRequestStatus.INCOMPLETE);
+			saveIncompleteDataRequest(dataRequestAttempt, unfetchedResources);
+		}
 		return searchBundles;
+	}
+
+	private DataRequestStatus searchForResourceType(URI searchUri,
+			Entry<ResourceType, Set<ResourceSearchParam>> resourceSearchParamsSet, DateRangeParam dateRange,
+			List<Bundle> searchBundles) {
+		if (Thread.currentThread().isInterrupted()) {
+			return DataRequestStatus.FAILED;
+		}
+		Map<String, List<String>> searchParameters = createSearchParams(resourceSearchParamsSet.getKey(),
+				resourceSearchParamsSet.getValue());
+		IGenericClient sourceFhirClient = fhirContext.newRestfulGenericClient(searchUri.toString());
+
+		Bundle searchBundle = sourceFhirClient//
+				.search()//
+				.forResource(resourceSearchParamsSet.getKey().name())//
+				.whereMap(searchParameters)//
+				.count(searchPageMax)//
+				.sort(createSortSpec()).lastUpdated(dateRange)//
+				.returnBundle(Bundle.class).execute();
+		searchBundles.add(searchBundle);
+		log.trace("received json " + fhirContext.newJsonParser().encodeResourceToString(searchBundle));
+		boolean hasNextPage = searchBundle.getLink(IBaseBundle.LINK_NEXT) != null;
+		while (hasNextPage) {
+			if (Thread.currentThread().isInterrupted()) {
+				return DataRequestStatus.FAILED;
+			}
+			searchBundle = sourceFhirClient.loadPage().next(searchBundle).execute();
+			log.trace("received json " + fhirContext.newJsonParser().encodeResourceToString(searchBundle));
+			searchBundles.add(searchBundle);
+			hasNextPage = searchBundle.getLink(IBaseBundle.LINK_NEXT) != null;
+		}
+
+		log.debug("received " + searchBundle.getTotal() + " entries of " + resourceSearchParamsSet.getKey());
+		return DataRequestStatus.SUCCEEDED;
+	}
+
+	private SortSpec createSortSpec() {
+		SortSpec sortSpec = new SortSpec();
+		sortSpec.setParamName("_id");
+		return sortSpec;
 	}
 
 	private Map<String, List<String>> createSearchParams(ResourceType resourceType,
@@ -140,6 +191,14 @@ public class DataRequestServiceImpl implements DataRequestService {
 		}
 		log.debug("search parameters for " + resourceType + " are: " + searchParameters);
 		return searchParameters;
+	}
+
+	private void saveIncompleteDataRequest(DataRequestAttempt dataRequestAttempt,
+			Set<ResourceType> unfetchedResources) {
+		IncompleteDataRequest incompleteDataRequest = new IncompleteDataRequest();
+		incompleteDataRequest.setDataRequestAttempt(dataRequestAttempt);
+		incompleteDataRequest.setUnfetchedResources(unfetchedResources);
+		incompleteDataRequestDAO.save(incompleteDataRequest);
 	}
 
 }

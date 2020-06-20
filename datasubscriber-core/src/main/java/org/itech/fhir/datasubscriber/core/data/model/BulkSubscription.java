@@ -14,8 +14,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.FhirServer;
@@ -41,7 +39,6 @@ public class BulkSubscription extends PersistenceEntity<Long> {
 	// persistence
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "source_server_id", nullable = false, updatable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	// validation
 	@NotNull
 	private FhirServer sourceServer;

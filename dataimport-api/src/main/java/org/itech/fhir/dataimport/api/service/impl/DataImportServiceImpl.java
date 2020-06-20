@@ -14,8 +14,8 @@ import org.itech.fhir.dataimport.api.service.DataSaveService;
 import org.itech.fhir.dataimport.core.dao.DataImportAttemptDAO;
 import org.itech.fhir.dataimport.core.model.DataImportAttempt;
 import org.itech.fhir.dataimport.core.model.DataImportAttempt.DataImportStatus;
-import org.itech.fhir.dataimport.core.model.DataImportTask;
 import org.itech.fhir.dataimport.core.service.DataImportTaskService;
+import org.itech.fhir.dataimport.core.model.DataImportTask;
 import org.itech.fhir.datarequest.api.service.DataRequestService;
 import org.itech.fhir.datarequest.core.exception.DataRequestFailedException;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,42 +85,46 @@ public class DataImportServiceImpl implements DataImportService {
 		}
 	}
 
-
 	private Future<DataImportStatus> runDataImportAttempt(DataImportAttempt dataImportAttempt) {
 		DataImportTask dataImportTask = dataImportAttempt.getDataImportTask();
 		try {
 			dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(),
 					DataImportStatus.REQUESTED);
 
-			List<Bundle> searchResultBundles;
+			Instant lastSuccess = dataImportTaskService.getLatestSuccessInstantForDataImportTask(dataImportTask);
 			Future<List<Bundle>> futureBundles = dataRequestService.requestDataFromServerFromInstant(
 					dataImportTask.getSourceServer().getId(), dataImportTask.getFhirResourceGroup().getId(),
-					dataImportTaskService.getLatestSuccessInstantForDataImportTask(dataImportTask));
+					lastSuccess);
+			Integer timeout = dataImportTask.getDataRequestAttemptTimeout() == null ? defaultDataImportRequestTimeout
+					: dataImportTask.getDataRequestAttemptTimeout();
+			DataImportStatus dataImportStatus;
+			List<Bundle> searchResultBundles;
 			try {
-				Integer timeout = dataImportTask.getDataRequestAttemptTimeout() == null
-						? defaultDataImportRequestTimeout
-						: dataImportTask.getDataRequestAttemptTimeout();
 				searchResultBundles = futureBundles.get(timeout, DataImportTask.TIMEOUT_UNITS);
+				dataImportStatus = DataImportStatus.SUCCEEDED;
 			} catch (TimeoutException e) {
 				futureBundles.cancel(true);
-				dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(),
-						DataImportStatus.TIMED_OUT);
-				return new AsyncResult<>(DataImportStatus.TIMED_OUT);
+				try {
+					log.debug("fetching incomplete results");
+					searchResultBundles = futureBundles.get(timeout, DataImportTask.TIMEOUT_UNITS);
+					dataImportStatus = DataImportStatus.INCOMPLETE;
+				} catch (TimeoutException e1) {
+					log.error("incomplete results couldn't be fetched");
+					throw new DataRequestFailedException();
+				}
 			}
 
-			dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(), DataImportStatus.SAVING);
-			dataSaveService.saveResultsFromServer(dataImportTask.getSourceServer().getId(), searchResultBundles);
 			dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(),
-					DataImportStatus.COMPLETE);
-			return new AsyncResult<>(DataImportStatus.COMPLETE);
+					DataImportStatus.PERSISTING);
+			dataSaveService.saveResultsFromServer(dataImportTask.getSourceServer().getId(), searchResultBundles);
+			dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(), dataImportStatus);
+			return new AsyncResult<>(dataImportStatus);
 		} catch (DataRequestFailedException | ExecutionException | InterruptedException | RuntimeException e) {
 			log.error("error occured while saving searchResultBundles to server", e);
 			dataImportStatusService.changeDataRequestAttemptStatus(dataImportAttempt.getId(), DataImportStatus.FAILED);
 			return new AsyncResult<>(DataImportStatus.FAILED);
 		}
 	}
-
-
 
 	private boolean minimumTimeHasPassed(DataImportTask dataImportTask) {
 		Instant now = Instant.now();

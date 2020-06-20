@@ -9,8 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.base.PersistenceEntity;
 import org.itech.fhir.dataimport.core.model.converter.DataImportStatusConverter;
@@ -24,7 +22,7 @@ import lombok.EqualsAndHashCode;
 public class DataImportAttempt extends PersistenceEntity<Long> {
 
 	public enum DataImportStatus {
-		GENERATED('G'), REQUESTED('R'), SAVING('S'), COMPLETE('C'), FAILED('F'), TIMED_OUT('T'), NOT_RAN('N');
+		GENERATED('G'), REQUESTED('R'), PERSISTING('P'), SUCCEEDED('S'), FAILED('F'), INCOMPLETE('I'), NOT_RAN('N');
 
 		private char code;
 
@@ -49,7 +47,6 @@ public class DataImportAttempt extends PersistenceEntity<Long> {
 	// persistence
 	@ManyToOne
 	@JoinColumn(nullable = false, updatable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	// validation
 	@NotNull
 	private DataImportTask dataImportTask;

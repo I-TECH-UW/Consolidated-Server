@@ -80,7 +80,7 @@ public class DataImportTaskServiceImpl extends CrudServiceImpl<DataImportTask, L
 
 		List<DataImportAttempt> lastImportAttempts = dataImportAttemptDAO
 				.findLatestDataImportAttemptsByDataImportTaskAndStatus(PageRequest.of(0, 1), dataImportTask.getId(),
-						DataImportStatus.COMPLETE);
+						DataImportStatus.SUCCEEDED);
 		if (lastImportAttempts.size() == 1) {
 			DataImportAttempt latestAttempt = lastImportAttempts.get(0);
 			lastSuccess = latestAttempt.getStartTime();

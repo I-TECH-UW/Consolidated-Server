@@ -1,8 +1,8 @@
 import React from "react";
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import { faLanguage } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faLanguage } from "@fortawesome/free-solid-svg-icons";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FormattedMessage } from 'react-intl';
 import { Link, withRouter } from "react-router-dom";
 
@@ -40,17 +40,6 @@ class Navigation extends React.Component {
                       defaultMessage="Home"
                       description="Go to home page" />
                     <span className="sr-only">(current)</span>
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item  ${
-                    this.props.location.pathname === "/about" ? "active" : ""
-                    }`}
-                >
-                  <Link className="nav-link" to="/about">
-                    <FormattedMessage id="nav.item.about"
-                      defaultMessage="About"
-                      description="Go to about page" />
                   </Link>
                 </li>
                 <li

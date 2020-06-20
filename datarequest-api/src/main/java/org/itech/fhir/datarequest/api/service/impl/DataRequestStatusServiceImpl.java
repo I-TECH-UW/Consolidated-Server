@@ -53,9 +53,9 @@ public class DataRequestStatusServiceImpl implements DataRequestAttemptStatusSer
 				break;
 			case ACCEPTED:
 				break;
-			case COMPLETE:
+			case SUCCEEDED:
 			case FAILED:
-			case TIMED_OUT:
+			case INCOMPLETE:
 				dataRequestAttemptWaitQueue.removeDataRequestAttempt(event.getDataRequestAttemptId());
 				dataRequestAttempt.setEndTime(Instant.now());
 			}

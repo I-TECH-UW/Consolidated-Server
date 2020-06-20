@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaRepositories("org.itech")
 @EntityScan("org.itech")
 @ComponentScan("org.itech")
-@PropertySource(value = { "file:/run/secrets/common.properties", "classpath:application.properties" })
+@PropertySource(value = { "classpath:application.properties" })
 public class DataImportWebApp {
 
 	public static void main(String[] args) {

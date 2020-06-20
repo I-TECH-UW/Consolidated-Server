@@ -39,7 +39,7 @@ public class DataRequestAttemptServiceImpl extends CrudServiceImpl<DataRequestAt
 
 		List<DataRequestAttempt> lastRequestAttempts = dataRequestAttemptRepository
 				.findLatestDataRequestAttemptsByServerAndFhirResourceGroupAndStatus(PageRequest.of(0, 1), serverId,
-						fhirResourceGroupId, DataRequestStatus.COMPLETE);
+						fhirResourceGroupId, DataRequestStatus.SUCCEEDED);
 		if (lastRequestAttempts.size() == 1) {
 			DataRequestAttempt latestAttempt = lastRequestAttempts.get(0);
 			lastSuccess = latestAttempt.getStartTime();

@@ -9,8 +9,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.FhirServer;
 import org.itech.fhir.core.model.base.AuditableEntity;
@@ -37,7 +35,6 @@ public class DataImportTask extends AuditableEntity<Long> {
 	// persistence
 	@OneToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	// validation
 	@NotNull
 	private FhirServer sourceServer;

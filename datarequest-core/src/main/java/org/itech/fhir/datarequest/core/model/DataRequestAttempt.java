@@ -9,8 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.itech.fhir.core.model.FhirResourceGroup;
 import org.itech.fhir.core.model.FhirServer;
 import org.itech.fhir.core.model.base.AuditableEntity;
@@ -25,7 +23,7 @@ import lombok.EqualsAndHashCode;
 public class DataRequestAttempt extends AuditableEntity<Long> {
 
 	public enum DataRequestStatus {
-		GENERATED('G'), REQUESTED('R'), ACCEPTED('A'), COMPLETE('C'), FAILED('F'), TIMED_OUT('T');
+		GENERATED('G'), REQUESTED('R'), ACCEPTED('A'), SUCCEEDED('S'), FAILED('F'), INCOMPLETE('I');
 
 		private char code;
 
@@ -50,7 +48,6 @@ public class DataRequestAttempt extends AuditableEntity<Long> {
 	// persistence
 	@ManyToOne
 	@JoinColumn(nullable = false, updatable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	// validation
 	@NotNull
 	private FhirServer server;

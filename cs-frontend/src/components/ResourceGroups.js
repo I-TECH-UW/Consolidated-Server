@@ -2,7 +2,7 @@ import React from "react";
 
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faEdit } from "@fortawesome/free-solid-svg-icons";
 
 class ResourceGroups extends React.Component {
 
@@ -16,7 +16,7 @@ class ResourceGroups extends React.Component {
 
 
 	async componentDidMount() {
-		const response = await fetch('https://host.openelis.org:8443/fhirResourceGroup/', {
+		const response = await fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/fhirResourceGroup/`, {
 			credentials: 'include'
 		});
 		const body = await response.json();

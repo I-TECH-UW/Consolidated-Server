@@ -12,8 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.itech.fhir.core.model.base.PersistenceEntity;
 
@@ -38,7 +36,6 @@ public class ResourceSearchParam extends PersistenceEntity<Long> {
 
 	@ManyToOne
 	@JoinColumn(name = "fhir_resource_group_id", nullable = false, updatable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	private FhirResourceGroup fhirResourceGroup;
 
 	ResourceSearchParam() {

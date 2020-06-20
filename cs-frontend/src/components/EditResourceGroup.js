@@ -33,10 +33,10 @@ class EditResourceGroup extends React.Component {
 
 	async componentDidMount() {
 		if (this.props.match.params.id !== 'new') {
-			const resourceGroup = await (await fetch(`https://host.openelis.org:8443/fhirResourceGroup/${this.props.match.params.id}`), {
+			const resourceGroup = await (await fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/fhirResourceGroup/${this.props.match.params.id}`), {
 				credentials: 'include'
 			}).json();
-			const resourceSearchParams = await (await fetch(`https://host.openelis.org:8443/fhirResourceGroup/${this.props.match.params.id}/resourceSearchParams`), {
+			const resourceSearchParams = await (await fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/fhirResourceGroup/${this.props.match.params.id}/resourceSearchParams`), {
 				credentials: 'include'
 			}).json();
 			const searchParams = {};
@@ -99,7 +99,8 @@ class EditResourceGroup extends React.Component {
 
 	handleBlur = (e) => {
 		e.preventDefault();
-		const { name, value } = e.target;
+		// const { name, value } = e.target;
+		const name = e.target.name;
 		let touched = this.state.touched;
 		touched[name] = true;
 		// if (name === 'resourceGroupName') {
@@ -112,12 +113,12 @@ class EditResourceGroup extends React.Component {
 	// 	let resourceGroupNameFilled = resourceGroupName.length > 0;
 	// 	let newResourceGroup = this.state.resourceGroup.id.length === 0;
 	// 	if ( alreadyChecked && resourceGroupNameFilled && newResourceGroup) {
-	// 		fetch(`https://host.openelis.org:8443/resourceGroup/name/${resourceGroupName}/available`)
+	// 		fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/resourceGroup/name/${resourceGroupName}/available`)
 	// 			.then((response) => response.json())
 	// 			.then((json) => { this.processResourceGroupNameCheck(resourceGroupName, json.response); });
 	// 		this.lastNameChecked = resourceGroupName;
 	// 	} else if (alreadyChecked && resourceGroupNameFilled) {
-	// 		fetch(`https://host.openelis.org:8443/resourceGroup/${this.state.resourceGroup.id}/name/${resourceGroupName}/available`)
+	// 		fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/resourceGroup/${this.state.resourceGroup.id}/name/${resourceGroupName}/available`)
 	// 			.then((response) => response.json())
 	// 			.then((json) => { this.processResourceGroupNameCheck(resourceGroupName, json.response); });
 	// 		this.lastNameChecked = resourceGroupName;
@@ -142,7 +143,7 @@ class EditResourceGroup extends React.Component {
 		object.resourceTypesSearchParams = this.state.resourceGroup.resourceSearchParams;
 		var json = JSON.stringify(object);
 		console.log(json);
-		fetch('https://host.openelis.org:8443/resourceGroup/', {
+		fetch(`${process.env.REACT_APP_DATA_IMPORT_API}/resourceGroup/`, {
 			method: 'POST',
 			headers: {
 				Accept: 'application/json',
@@ -178,7 +179,7 @@ class EditResourceGroup extends React.Component {
 				<td>
 					<input
 						type="checkbox"
-						onChange={(e) => this.handleCheck(value, e)} />
+						onChange={() => this.handleCheck(value)} />
 					<label htmlFor={label}> {label}</label>
 					{this.state.checked[value] &&
 						<div>
@@ -195,7 +196,7 @@ class EditResourceGroup extends React.Component {
 		);
 	}
 
-	handleCheck = (value, e) => {
+	handleCheck = (value) => {
 		const checked = this.state.checked;
 		const resourceSearchParams = this.state.resourceGroup.resourceSearchParams;
 		checked[value] = !checked[value];
