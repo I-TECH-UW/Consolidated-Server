@@ -22,16 +22,16 @@ public class HttpClientConfig {
 	private Resource trustStore;
 
 	@Value("${server.ssl.trust-store-password}")
-	private String trustStorePassword;
+	private char[] trustStorePassword;
 
 	@Value("${server.ssl.key-store}")
 	private Resource keyStore;
 
 	@Value("${server.ssl.key-store-password}")
-	private String keyStorePassword;
+	private char[] keyStorePassword;
 
 	@Value("${server.ssl.key-password}")
-	private String keyPassword;
+	private char[] keyPassword;
 
 	public SSLConnectionSocketFactory sslConnectionSocketFactory() throws Exception {
 		return new SSLConnectionSocketFactory(sslContext());
@@ -39,8 +39,8 @@ public class HttpClientConfig {
 
 	public SSLContext sslContext() throws Exception {
 		return SSLContextBuilder.create()
-				.loadKeyMaterial(keyStore.getFile(), keyStorePassword.toCharArray(), keyPassword.toCharArray())
-				.loadTrustMaterial(trustStore.getFile(), trustStorePassword.toCharArray()).build();
+				.loadKeyMaterial(keyStore.getFile(), keyStorePassword, keyPassword)
+				.loadTrustMaterial(trustStore.getFile(), trustStorePassword).build();
 	}
 
 	@Bean
