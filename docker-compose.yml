@@ -2,11 +2,12 @@ version: '3.3'
 services:
 
    #this is here since we can't just pull a built image from the cloud with our libraries
-#  itech-fhir-libraries:
-#   image: itech-fhir-libraries
-#   build:
-#      context: .
-#      dockerfile: docker/docker-build/Dockerfile
+  itech-fhir-libraries:
+   image: itech-fhir-libraries
+   build:
+      context: .
+
+      dockerfile: docker/docker-build/Dockerfile
       
   cs-frontend:
     image: cs-frontend
@@ -40,7 +41,6 @@ services:
       - consolidated-server-data:/var/lib/postgresql/data
       - ./dev/database/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
     networks:
-      - frontend
       - server-1
     
   dataimport.openelis.org:
@@ -54,10 +54,16 @@ services:
       - 8080:8080
       - 8443:8443
     networks:
-      - frontend
       - server-1
     volumes:
       - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+    extra_hosts:
+#    this should be the loopback to the docker host. 
+#    run 
+#    /sbin/ip route|awk '/default/ { print $3 }' 
+#    inside the container to make sure the ip address is correct
+#    make sure connections to 8446 are allowed by your firewall
+      - host.openelis.org:172.20.0.1
     secrets:
       - source: keystore
       - source: truststore
@@ -75,31 +81,10 @@ services:
     volumes:
       - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
-      - source: common.properties
       - source: hapi.properties
       - source: keystore
       - source: truststore
 
-
-  fhir2.openelis.org:
-    build: ./hapi-fhir-jpaserver-starter
-    restart: always
-    environment:
-      - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi2.properties
-    ports:
-      - 8082:8080
-      - 8445:8443
-    networks:
-      - frontend
-      - server-2
-    volumes:
-      - ./dev/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
-    secrets:
-      - source: common.properties
-      - source: hapi2.properties
-      - source: keystore
-      - source: truststore
-      
   auth.openelis.org:
     image:
       quay.io/keycloak/keycloak:10.0.2
@@ -119,26 +104,19 @@ services:
       - frontend
       - server-1
     volumes:
-      - ./dev/ssl/openelis.org.crt:/etc/x509/https/tls.crt
-      - ./dev/ssl/openelis.org.key:/etc/x509/https/tls.key
-      
-     
+      - ./dev/ssl/oe_selfsigned.crt:/etc/x509/https/tls.crt
+      - ./dev/ssl/oe_selfsigned.key:/etc/x509/https/tls.key
 
 networks:
   frontend:
   server-1:
-  server-2:
   
 volumes:
   consolidated-server-data:
   
 secrets:
-  common.properties:
-    file: ./dev/properties/common.properties
   hapi.properties:
     file: ./dev/properties/hapi.properties
-  hapi2.properties:
-    file: ./dev/properties/hapi2.properties
   keystore:
     file: ./dev/ssl/oe_selfsigned.keystore
   truststore:
