@@ -6,7 +6,6 @@ services:
    image: itech-fhir-libraries
    build:
       context: .
-
       dockerfile: docker/docker-build/Dockerfile
       
   cs-frontend:
