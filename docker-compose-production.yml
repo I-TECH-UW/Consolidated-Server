@@ -26,23 +26,22 @@ services:
       context: ./dataimport-webapp
       dockerfile: docker/docker-build/Dockerfile
     ports:
-      - 8080:8080
       - 8443:8443
-    volumes:
-      - ./prod/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
       - source: keystore
       - source: truststore
       
   fhir.openelis.org:
-    build: ./hapi-fhir-jpaserver-starter
+    build: 
+      context: ./hapi-fhir-jpaserver-starter
+      dockerfile: Dockerfile.prod
     restart: always
     environment:
       - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
     ports:
       - 8444:8443
     volumes:
-      - ./prod/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+      - ./prod/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
       - source: hapi.properties
       - source: keystore
@@ -55,17 +54,17 @@ services:
     environment:
       - DB_VENDOR=postgres
       - DB_ADDR=
-      - DB_PORT=5432
+      - DB_PORT=
       - DB_DATABASE=consolidated-server
       - DB_SCHEMA=keycloak
-      - DB_USER=
-      - DB_PASSWORD=
+      - DB_USER_FILE=./prod/database/user
+      - DB_PASSWORD_FILE=./prod/database/password
     ports:
       - 8083:8080
       - 8446:8443
     volumes:
-      - ./dev/ssl/cs.crt:/etc/x509/https/tls.crt
-      - ./dev/ssl/cs.key:/etc/x509/https/tls.key
+      - ./prod/ssl/cs.crt:/etc/x509/https/tls.crt
+      - ./prod/ssl/cs.key:/etc/x509/https/tls.key
 
 secrets:
   hapi.properties:
@@ -78,4 +77,3 @@ secrets:
     file: ./prod/ssl/cs.crt
   key:
     file: ./prod/ssl/cs.key
-

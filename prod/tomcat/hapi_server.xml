@@ -77,9 +77,9 @@
                acceptCount="100" debug="0" scheme="https" secure="true"
                clientAuth="true" sslProtocol="TLS" SSLEnabled="true" 
                keystoreFile="/run/secrets/keystore"
-               keystorePass="testtest"
+               keystorePass=""
                truststoreFile="/run/secrets/truststore"
-               truststorePass="testtest" />
+               truststorePass="" />
                
     <!-- A "Connector" using the shared thread pool-->
     <!--
