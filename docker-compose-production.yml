@@ -14,6 +14,7 @@ services:
       dockerfile: ./Dockerfile.prod    
     depends_on:
       - dataimport.openelis.org
+    restart: always
     ports:
       - 443:443
     secrets:
@@ -25,6 +26,7 @@ services:
     build:
       context: ./dataimport-webapp
       dockerfile: docker/docker-build/Dockerfile
+    restart: always
     ports:
       - 8443:8443
     secrets:
@@ -57,14 +59,17 @@ services:
       - DB_PORT=
       - DB_DATABASE=consolidated-server
       - DB_SCHEMA=keycloak
-      - DB_USER_FILE=./prod/database/user
-      - DB_PASSWORD_FILE=./prod/database/password
+      - DB_USER_FILE=/run/secrets/db_user
+      - DB_PASSWORD_FILE=/run/secrets/db_password
     ports:
       - 8083:8080
       - 8446:8443
     volumes:
       - ./prod/ssl/cs.crt:/etc/x509/https/tls.crt
       - ./prod/ssl/cs.key:/etc/x509/https/tls.key
+    secrets:
+      - source: db_user
+      - source: db_password
 
 secrets:
   hapi.properties:
@@ -77,3 +82,7 @@ secrets:
     file: ./prod/ssl/cs.crt
   key:
     file: ./prod/ssl/cs.key
+  db_user:
+    file: ./prod/database/user
+  db_password:
+    file: ./prod/database/password
