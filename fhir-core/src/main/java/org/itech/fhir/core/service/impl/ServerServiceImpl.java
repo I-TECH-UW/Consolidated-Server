@@ -1,6 +1,7 @@
 package org.itech.fhir.core.service.impl;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.hibernate.ObjectNotFoundException;
@@ -81,6 +82,21 @@ public class ServerServiceImpl extends CrudServiceImpl<FhirServer, Long> impleme
 	@Override
 	public ServerDAO getDAO() {
 		return serverRepository;
+	}
+
+	@Override
+	public void receiveNotificationFromServer(String serverName, String serverCode) {
+		Optional<FhirServer> server = serverRepository.findByName(serverName);
+		if (!server.isPresent()) {
+			server = Optional.of(serverRepository.save(new FhirServer(serverName)));
+			server.get().setCode(serverCode);
+		}
+		updateServerLastReceivedTime(server.get(), Instant.now());
+	}
+
+	private void updateServerLastReceivedTime(FhirServer fhirServer, Instant lastReceivedTime) {
+		fhirServer.setLastCheckedIn(lastReceivedTime);
+		serverRepository.save(fhirServer);
 	}
 
 }

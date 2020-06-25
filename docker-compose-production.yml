@@ -13,7 +13,7 @@ services:
       context: ./cs-frontend
       dockerfile: ./Dockerfile.prod    
     depends_on:
-      - dataimport.openelis.org
+      - fhir-server-management.openelis.org
     restart: always
     ports:
       - 443:443
@@ -21,14 +21,26 @@ services:
       - source: cert
       - source: key
     
-  dataimport.openelis.org:
-    image: dataimport-webapp
+  fhir-server-management.openelis.org:
+    image: fhir-server-management-webapp
     build:
-      context: ./dataimport-webapp
+      context: ./fhir-server-management-webapp
       dockerfile: docker/docker-build/Dockerfile
     restart: always
     ports:
       - 8443:8443
+    secrets:
+      - source: keystore
+      - source: truststore
+    
+  fhir-proxy.openelis.org:
+    image: fhir-proxy-webapp
+    build:
+      context: ./fhir-proxy-webapp
+      dockerfile: docker/docker-build/Dockerfile
+    restart: always
+    ports:
+      - 8444:8443
     secrets:
       - source: keystore
       - source: truststore
@@ -41,7 +53,7 @@ services:
     environment:
       - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
     ports:
-      - 8444:8443
+      - 8445:8443
     volumes:
       - ./prod/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
     secrets:

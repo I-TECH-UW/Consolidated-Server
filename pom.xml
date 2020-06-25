@@ -10,18 +10,14 @@
 	</parent>
 	<groupId>org.itech</groupId>
 	<artifactId>consolidated-server</artifactId>
-	<version>0.0.0.8</version>
+	<version>0.0.0.9</version>
 	<packaging>pom</packaging>
 	<name>Consolidated Server</name>
 
 	<modules>
 		<module>fhir-core</module>
-		<module>datasubscriber-core</module>
-		<module>datarequest-core</module>
-		<module>datarequest-api</module>
-		<module>dataimport-core</module>
-		<module>dataimport-api</module>
-		<module>dataimport-webapp</module>
+		<module>fhir-server-management-webapp</module>
+		<module>fhir-proxy-webapp</module>
 	</modules>
 
 	<dependencies>

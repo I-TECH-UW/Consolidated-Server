@@ -22,4 +22,6 @@ public interface ServerService extends CrudService<FhirServer, Long> {
 	@Override
 	ServerDAO getDAO();
 
+	void receiveNotificationFromServer(String serverName, String serverCode);
+
 }

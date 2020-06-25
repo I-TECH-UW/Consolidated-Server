@@ -14,7 +14,7 @@ services:
       context: ./cs-frontend
       dockerfile: ./Dockerfile    
     depends_on:
-      - dataimport.openelis.org
+      - fhir-server-management.openelis.org
     ports:
       - 3000:3000
     networks:
@@ -42,16 +42,37 @@ services:
     networks:
       - server-1
     
-  dataimport.openelis.org:
-    image: dataimport-webapp
+  fhir-server-management.openelis.org:
+    image: fhir-server-management-webapp
     build:
-      context: ./dataimport-webapp
+      context: ./fhir-server-management-webapp
       dockerfile: docker/docker-build/Dockerfile
     depends_on:
       - consolidated-server-data
     ports:
-      - 8080:8080
-      - 8443:8443
+      - 8449:8443
+    networks:
+      - server-1
+    extra_hosts:
+#    this should be the loopback to the docker host. 
+#    run 
+#    /sbin/ip route|awk '/default/ { print $3 }' 
+#    inside the container to make sure the ip address is correct
+#    make sure connections to 8446 are allowed by your firewall
+      - host.openelis.org:172.20.0.1
+    secrets:
+      - source: keystore
+      - source: truststore
+    
+  fhir-proxy.openelis.org:
+    image: fhir-proxy-webapp
+    build:
+      context: ./fhir-proxy-webapp
+      dockerfile: docker/docker-build/Dockerfile
+    depends_on:
+      - consolidated-server-data
+    ports:
+      - 8447:8443
     networks:
       - server-1
     extra_hosts:
@@ -71,10 +92,17 @@ services:
     environment:
       - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
     ports:
-      - 8444:8443
+      - 8448:8443
     networks:
       - frontend
       - server-1  
+    extra_hosts:
+#    this should be the loopback to the docker host. 
+#    run 
+#    /sbin/ip route|awk '/default/ { print $3 }' 
+#    inside the container to make sure the ip address is correct
+#    make sure connections to 8446 are allowed by your firewall
+      - host.openelis.org:172.20.0.1
     volumes:
       - ./dev/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
     secrets:
@@ -94,15 +122,24 @@ services:
       - DB_SCHEMA=keycloak
       - DB_USER=cs_user
       - DB_PASSWORD=cs_password
+#      - KEYCLOAK_USER=admin
+#      - KEYCLOAK_PASSWORD=admin
     ports:
       - 8083:8080
       - 8446:8443
     networks:
       - frontend
       - server-1
+    extra_hosts:
+#    this should be the loopback to the docker host. 
+#    run 
+#    /sbin/ip route|awk '/default/ { print $3 }' 
+#    inside the container to make sure the ip address is correct
+#    make sure connections to 8446 are allowed by your firewall
+      - host.openelis.org:172.20.0.1
     volumes:
-      - ./dev/ssl/oe_selfsigned.crt:/etc/x509/https/tls.crt
-      - ./dev/ssl/oe_selfsigned.key:/etc/x509/https/tls.key
+      - ./dev/ssl/openelis.org.crt:/etc/x509/https/tls.crt
+      - ./dev/ssl/openelis.org.key:/etc/x509/https/tls.key
 
 networks:
   frontend:
@@ -115,11 +152,11 @@ secrets:
   hapi.properties:
     file: ./dev/properties/hapi.properties
   keystore:
-    file: ./dev/ssl/oe_selfsigned.keystore
+    file: ./dev/ssl/openelis.org.keystore
   truststore:
-    file: ./dev/ssl/oe_selfsigned.truststore
+    file: ./dev/ssl/openelis.org.truststore
   cert:
-    file: ./dev/ssl/oe_selfsigned.crt
+    file: ./dev/ssl/openelis.org.crt
   key:
-    file: ./dev/ssl/oe_selfsigned.key
+    file: ./dev/ssl/openelis.org.key
 

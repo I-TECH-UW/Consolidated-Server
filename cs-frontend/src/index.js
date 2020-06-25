@@ -9,7 +9,7 @@ import Keycloak from 'keycloak-js';
 let keycloakOptions = {
   "realm": "Consolidated-Server",
   "url": "https://host.openelis.org:8446/auth",
-  clientId: 'data-import',
+  clientId: 'server-management',
   "ssl-required": "true",
 };
 //Get the keycloak configuration

@@ -2,7 +2,7 @@
    "realm": "Consolidated-Server",
    "auth-server-url": "http://auth.openelis.org:8080/auth",
    "ssl-required": "none",
-   "clientId": "data-import",
+   "clientId": "server-management",
    "public-client": true,
    "verify-token-audience": true,
    "use-resource-role-mappings": true,
