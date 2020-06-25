@@ -1,3 +1,3 @@
-CREATE SCHEMA fhir;
+CREATE SCHEMA hapi_fhir;
 CREATE SCHEMA keycloak;
-CREATE SCHEMA consolidated_server;
+CREATE SCHEMA server_management;

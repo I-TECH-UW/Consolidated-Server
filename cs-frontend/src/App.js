@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { Navigation, Footer, Home, Servers, EditServer, ResourceGroups, EditResourceGroup } from "./components";
+import { Navigation, Footer, Home, Servers } from "./components";
 import { IntlProvider } from 'react-intl';
 
 import messages_en from './i18n/en.json';
@@ -56,9 +56,6 @@ class App extends React.Component {
             <Switch>
               <Route path="/" exact component={Home} />
               <Route path="/server" exact component={Servers} />
-              <Route path='/server/:id' component={EditServer} />
-              <Route path="/resourceGroup" exact component={ResourceGroups} />
-              <Route path='/resourceGroup/:id' component={EditResourceGroup} />
             </Switch>
             <Footer />
           </Router>
