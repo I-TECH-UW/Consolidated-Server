@@ -1,5 +1,6 @@
 package org.itech.fhir.proxy.webapp.filter;
 
+import org.apache.commons.validator.GenericValidator;
 import org.itech.fhir.core.service.ServerService;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,7 @@ import com.netflix.zuul.exception.ZuulException;
 @Component
 public class UpdateServerFilter extends ZuulFilter {
 
-	ServerService serverService;
+	private ServerService serverService;
 
 	public UpdateServerFilter(ServerService serverService) {
 		this.serverService = serverService;
@@ -27,8 +28,11 @@ public class UpdateServerFilter extends ZuulFilter {
 		String serverName = ctx.getRequest().getHeader("Server-Name");
 		String serverCode = ctx.getRequest().getHeader("Server-Code");
 
-		serverService.receiveNotificationFromServer(serverName, serverCode);
+		if (GenericValidator.isBlankOrNull(serverCode) && GenericValidator.isBlankOrNull(serverName)) {
+			return null;
+		}
 
+		serverService.receiveNotificationFromServer(serverName, serverCode);
 		return null;
 	}
 

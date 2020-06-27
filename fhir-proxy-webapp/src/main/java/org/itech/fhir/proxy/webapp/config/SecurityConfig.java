@@ -19,8 +19,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.antMatcher("/fhir/**").authorizeRequests().anyRequest().authenticated().and().x509()
-				.subjectPrincipalRegex("CN=(.*?)(?:,|$)").userDetailsService(certificateUserDetailsService());
+		http.authorizeRequests().anyRequest().authenticated().and().x509().subjectPrincipalRegex("CN=(.*?)(?:,|$)")
+				.userDetailsService(certificateUserDetailsService()).and().csrf().disable();
 	}
 
 	@Bean

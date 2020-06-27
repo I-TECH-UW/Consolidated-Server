@@ -86,7 +86,7 @@ public class ServerServiceImpl extends CrudServiceImpl<FhirServer, Long> impleme
 
 	@Override
 	public void receiveNotificationFromServer(String serverName, String serverCode) {
-		Optional<FhirServer> server = serverRepository.findByName(serverName);
+		Optional<FhirServer> server = serverRepository.findByCode(serverCode);
 		if (!server.isPresent()) {
 			server = Optional.of(serverRepository.save(new FhirServer(serverName)));
 			server.get().setCode(serverCode);
