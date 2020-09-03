@@ -77,7 +77,7 @@ class Servers extends React.Component {
 							<th>code</th>
 							<th>uri</th>
 							<th>last checked in</th>
-//							<th><Link to={"/server/new"} className="btn"><FontAwesomeIcon icon={faPlus} /></Link></th>
+{/*							<th><Link to={"/server/new"} className="btn"><FontAwesomeIcon icon={faPlus} /></Link></th>*/}
 						</tr>
 					</thead>
 					<tbody>
@@ -88,8 +88,8 @@ class Servers extends React.Component {
 								<td className="server-code" ><Link to={"/server/" + server.id + "/view"} className="btn">{server.code}</Link></td>
 								<td className="server-uri" >{server.uri}</td>
 								<td className="server-lastCheckedIn" >{dateTimeFormat.format(new Date(server.lastCheckedIn))}</td>
-//								<td className="server-edit" ><Link to={"/server/" + server.id} className="btn"><FontAwesomeIcon icon={faEdit} /></Link></td>
-//								<td className="server-delete" ><button className="btn" onClick={() => this.deleteServer(server)}><FontAwesomeIcon icon={faTrash} /></button></td>
+{/*								<td className="server-edit" ><Link to={"/server/" + server.id} className="btn"><FontAwesomeIcon icon={faEdit} /></Link></td>
+								<td className="server-delete" ><button className="btn" onClick={() => this.deleteServer(server)}><FontAwesomeIcon icon={faTrash} /></button></td>*/}
 							</tr>
 						)}
 					</tbody>
