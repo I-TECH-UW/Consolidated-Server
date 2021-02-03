@@ -7,7 +7,7 @@ services:
     ports:
     - 5432:5432
     volumes:
-    - /var/lib/consolidated-server/data:/var/lib/postgresql/data
+    - /var/lib/consolidated-server/postgresdata:/var/lib/postgresql/data
     - ./prod/database/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
     networks:
     - backend-network
@@ -21,9 +21,6 @@ services:
       SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
     ports:
     - 8446:8443
-    volumes:
-    - ./prod/ssl/cs.crt:/etc/x509/https/tls.crt
-    - ./prod/ssl/cs.key:/etc/x509/https/tls.key
     networks:
     - backend-network
     
@@ -32,7 +29,9 @@ services:
     restart: always
     ports:
     - 27017:27017
-    image: mongo:3.4    
+    image: mongo:3.4 
+    volumes:
+     - /var/lib/consolidated-server/mongodata:/data/db   
     networks:
     - backend-network
     
@@ -143,6 +142,9 @@ services:
 #    - DB_SCHEMA=keycloak
 #    - DB_USER_FILE=/run/secrets/db_user
 #    - DB_PASSWORD_FILE=/run/secrets/db_password
+#    volumes:
+#    - ./prod/ssl/cs.crt:/etc/x509/https/tls.crt
+#    - ./prod/ssl/cs.key:/etc/x509/https/tls.key
 networks:
   frontend-network: 
   backend-network: 
