@@ -1,3 +1,0 @@
-[submodule "hapi-fhir-jpaserver"]
-	path = hapi-fhir-jpaserver-starter
-	url = https://github.com/I-TECH-UW/hapi-fhir-jpaserver-starter.git
