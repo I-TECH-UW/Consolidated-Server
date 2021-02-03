@@ -16,12 +16,12 @@ services:
     volumes:
     - ./prod/properties/application.yaml:/data/hapi/application.yaml
     environment: 
-    SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
+      SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
     ports:
     - 8446:8443
     volumes:
-    - cs.crt:/etc/x509/https/tls.crt
-    - cs.key/etc/x509/https/tls.key
+    - ./prod/ssl/cs.crt:/etc/x509/https/tls.crt
+    - ./prod/ssl/cs.key:/etc/x509/https/tls.key
     networks:
     - backend-network
     
@@ -71,8 +71,8 @@ services:
     - 443:443
     volumes:
     - ./prod/conf/nginx.conf:/etc/nginx/nginx.conf
-    - cs.crt:/etc/nginx/serverCerts/cs.crt
-    - cs.key:/etc/nginx/serverCerts/cs.key
+    - ./prod/ssl/cs.crt:/etc/nginx/serverCerts/cs.crt
+    - ./prod/ssl/cs.key:/etc/nginx/serverCerts/cs.key
     networks:
     - frontend-network
 #    secrets:
@@ -141,11 +141,6 @@ services:
 networks:
   frontend-network: 
   backend-network: 
-volumes:
-  cs.crt:
-    file: ./prod/ssl/cs.crt
-  cs.key:
-    file: ./prod/ssl/cs.key
 #secrets:
 #  hapi.properties:
 #    file: ./prod/properties/hapi.properties
