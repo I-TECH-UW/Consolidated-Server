@@ -23,16 +23,10 @@ services:
       depends_on:
       - fhir-server-management.openelis.org
       restart: always
-#    nginx will redirect to this, does not need to be outside visible
       networks:
       - frontend-network
    fhir-server-management.openelis.org:
       image: fhir-server-management-webapp
-#    ports:
-#      - 443:443
-#    secrets:
-#      - source: cert
-#      - source: key
       build:
          context: ./fhir-server-management-webapp
          dockerfile: docker/docker-build/Dockerfile
@@ -50,7 +44,7 @@ services:
          dockerfile: docker/docker-build/Dockerfile
       restart: always
       ports:
-      - 8444:8443
+      - 9000:9000
       secrets:
       -  source: extra.properties
       -  source: keystore
@@ -131,7 +125,6 @@ services:
       volumes:
       - ./prod/conf/nginx.conf:/etc/nginx/nginx.conf
       networks:
-#        - "9000:80"
       - frontend-network
       secrets:
       - cert
