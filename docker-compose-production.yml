@@ -1,149 +1,165 @@
 version: '3.3'
 services:
+  consolidated-server-data:
+    image: postgres:12-alpine
+    env_file:
+    - ./prod/database/database.env # configure postgres
+    volumes:
+    - /var/lib/consolidated-server/data:/var/lib/postgresql/data
+    - ./prod/database/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
+    networks:
+    - backend-network
+
+  hapi-fhir-jpaserver:
+    image: hapiproject/hapi:latest
+    restart: always
+    volumes:
+    - ./prod/properties/application.yaml:/data/hapi/application.yaml
+    environment: 
+    SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
+    ports:
+    - 8446:8443
+    volumes:
+    - cs.crt:/etc/x509/https/tls.crt
+    - cs.crt/etc/x509/https/tls.key
+    networks:
+    - backend-network
+    
+  mongo:
+    container_name: openhim-mongo
+    restart: always
+    ports:
+    - 27017:27017
+    image: mongo:3.4
+    
+  openhim-core:
+    container_name: openhim-core
+    restart: always
+    image: jembi/openhim-core
+    environment:
+    - mongo_url=mongodb://mongo/openhim
+    - mongo_atnaUrl=mongodb://mongo/openhim
+    ports:
+    - 8080:8080
+    - 5000:5000
+    - 5001:5001
+    - 5050:5050
+    - 5051:5051
+    - 5052:5052
+    - 7788:7788
+    depends_on:
+    - mongo
+    networks:
+    - backend-network
+    
+  openhim-console:
+    container_name: openhim-console
+    restart: always
+    image: jembi/openhim-console
+    volumes:
+    - ./prod/properties/default.json:/usr/share/nginx/html/config/default.json
+    networks:
+    - frontend-network
+    - backend-network
+    
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+    - 80:80
+    - 443:443
+    volumes:
+    - ./prod/conf/nginx.conf:/etc/nginx/nginx.conf
+    - cs.crt:/etc/nginx/serverCerts/cs.crt
+    - cs.crt/etc/nginx/serverCerts/cs.key
+    networks:
+    - frontend-network
+#    secrets:
+#    - cert
+#    - key
 #this is here since we can't just pull a built image from the cloud with our libraries
-   itech-fhir-libraries:
-      image: itech-fhir-libraries
-      build:
-         context: .
-         dockerfile: docker/docker-build/Dockerfile
-   consolidated-server-data:
-      image: postgres:12-alpine
-      env_file:
-      - ./prod/database/database.env # configure postgres
-      ports:
-      - 15432:5432
-      volumes:
-      - /var/lib/consolidated-server/data:/var/lib/postgresql/data
-      - ./prod/database/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
-   cs-frontend:
-      image: cs-frontend
-      build:
-         context: ./cs-frontend
-         dockerfile: ./Dockerfile.prod
-      depends_on:
-      - fhir-server-management.openelis.org
-      restart: always
-      networks:
-      - frontend-network
-   fhir-server-management.openelis.org:
-      image: fhir-server-management-webapp
-      build:
-         context: ./fhir-server-management-webapp
-         dockerfile: docker/docker-build/Dockerfile
-      restart: always
-      ports:
-      - 8443:8443
-      secrets:
-      -  source: extra.properties
-      -  source: keystore
-      -  source: truststore
-   fhir-proxy.openelis.org:
-      image: fhir-proxy-webapp
-      build:
-         context: ./fhir-proxy-webapp
-         dockerfile: docker/docker-build/Dockerfile
-      restart: always
-      ports:
-      - 9000:9000
-      secrets:
-      -  source: extra.properties
-      -  source: keystore
-      -  source: truststore
-   fhir.openelis.org:
-      build:
-         context: ./hapi-fhir-jpaserver-starter
-         dockerfile: Dockerfile
-      restart: always
-      environment:
-      - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
-      ports:
-      - 8445:8443
-      volumes:
-      - ./prod/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
-      secrets:
-      -  source: hapi.properties
-      -  source: keystore
-      -  source: truststore
-   auth.openelis.org:
-      image: quay.io/keycloak/keycloak:10.0.2
-      restart: always
-      environment:
-      - DB_VENDOR=postgres
-      - DB_ADDR=consolidated-server-data
-      - DB_PORT=15432
-      - DB_DATABASE=consolidated-server
-      - DB_SCHEMA=keycloak
-      - DB_USER_FILE=/run/secrets/db_user
-      - DB_PASSWORD_FILE=/run/secrets/db_password
-      ports:
-      - 8446:8443
-      volumes:
-      - ./prod/ssl/cs.crt:/etc/x509/https/tls.crt
-      - ./prod/ssl/cs.key:/etc/x509/https/tls.key
-      secrets:
-      -  source: db_user
-      -  source: db_password
-      networks:
-      - frontend-network
-   mongo:
-      container_name: openhim-mongo
-      ports:
-      - 27017:27017
-      image: mongo:3.4
-   openhim-core:
-      container_name: openhim-core
-      image: jembi/openhim-core
-      environment:
-      - mongo_url=mongodb://mongo/openhim
-      - mongo_atnaUrl=mongodb://mongo/openhim
-      ports:
-      - 8080:8080
-      - 5000:5000
-      - 5001:5001
-      - 5050:5050
-      - 5051:5051
-      - 5052:5052
-      - 7788:7788
-      depends_on:
-      - mongo
-   openhim-console:
-      container_name: openhim-console
-      image: jembi/openhim-console
-      volumes:
-      - ./prod/properties/default.json:/usr/share/nginx/html/config/default.json
-#    expose:
-      networks:
-      - frontend-network
-   nginx:
-      restart: always
-      image: nginx:latest
-      container_name: nginx
-      ports:
-      - 80:80
-      - 443:443
-      volumes:
-      - ./prod/conf/nginx.conf:/etc/nginx/nginx.conf
-      networks:
-      - frontend-network
-      secrets:
-      - cert
-      - key
+#   itech-fhir-libraries:
+#     image: itech-fhir-libraries
+#     build:
+#       context: .
+#       dockerfile: docker/docker-build/Dockerfile
+#   consolidated-server-data:
+#     image: postgres:12-alpine
+#     env_file:
+#     - ./prod/database/database.env # configure postgres
+#     ports:
+#     - 15432:5432
+#     volumes:
+#     - /var/lib/consolidated-server/data:/var/lib/postgresql/data
+#     - ./prod/database/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
+#   cs-frontend:
+#     image: cs-frontend
+#     build:
+#       context: ./cs-frontend
+#       dockerfile: ./Dockerfile.prod
+#     depends_on:
+#     - fhir-server-management.openelis.org
+#     restart: always
+#     networks:
+#     - frontend-network
+#   fhir-server-management.openelis.org:
+#     image: fhir-server-management-webapp
+#     build:
+#       context: ./fhir-server-management-webapp
+#       dockerfile: docker/docker-build/Dockerfile
+#     restart: always
+#     ports:
+#     - 8443:8443
+#     secrets:
+#     - source: extra.properties
+#     - source: keystore
+#     - source: truststore
+#   fhir-proxy.openelis.org:
+#     image: fhir-proxy-webapp
+#     build:
+#       context: ./fhir-proxy-webapp
+#       dockerfile: docker/docker-build/Dockerfile
+#     restart: always
+#     ports:
+#     - 9000:9000
+#     secrets:
+#     - source: extra.properties
+#     - source: keystore
+#     - source: truststore
+#  auth.openelis.org:
+#    image: quay.io/keycloak/keycloak:10.0.2
+#    restart: always
+#    environment:
+#    - DB_VENDOR=postgres
+#    - DB_ADDR=host.openelis.org
+#    - DB_PORT=15432
+#    - DB_DATABASE=consolidated-server
+#    - DB_SCHEMA=keycloak
+#    - DB_USER_FILE=/run/secrets/db_user
+#    - DB_PASSWORD_FILE=/run/secrets/db_password
 networks:
-   frontend-network: null
-secrets:
-   hapi.properties:
-      file: ./prod/properties/hapi.properties
-   extra.properties:
-      file: ./prod/properties/extra.properties
-   truststore:
-      file: ./prod/ssl/cs.truststore
-   keystore:
-      file: ./prod/ssl/cs.keystore
-   cert:
-      file: ./prod/ssl/cs.crt
-   key:
-      file: ./prod/ssl/cs.key
-   db_user:
-      file: ./prod/database/user
-   db_password:
-      file: ./prod/database/password
+  frontend-network: 
+  backend-network: 
+volumes:
+  cs.crt:
+    file: ./prod/ssl/cs.crt
+  cs.key:
+    file: ./prod/ssl/cs.key
+#secrets:
+#  hapi.properties:
+#    file: ./prod/properties/hapi.properties
+#  extra.properties:
+#    file: ./prod/properties/extra.properties
+#  truststore:
+#    file: ./prod/ssl/cs.truststore
+#  keystore:
+#    file: ./prod/ssl/cs.keystore
+#  cert:
+#    file: ./prod/ssl/cs.crt
+#  key:
+#    file: ./prod/ssl/cs.key
+#  db_user:
+#    file: ./prod/database/user
+#  db_password:
+#    file: ./prod/database/password
