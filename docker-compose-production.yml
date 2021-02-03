@@ -52,7 +52,7 @@ services:
    fhir.openelis.org:
       build:
          context: ./hapi-fhir-jpaserver-starter
-         dockerfile: Dockerfile.prod
+         dockerfile: Dockerfile
       restart: always
       environment:
       - JAVA_OPTS= -Dhapi.properties=/run/secrets/hapi.properties
