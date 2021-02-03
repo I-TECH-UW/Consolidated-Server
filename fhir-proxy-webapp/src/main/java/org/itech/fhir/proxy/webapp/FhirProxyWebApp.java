@@ -19,7 +19,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ConfigurationPropertiesScan("org.itech")
 @PropertySources({ @PropertySource(value = { "classpath:application.properties" }),
 		@PropertySource(value = "file:/run/secrets/extra.properties", ignoreResourceNotFound = true) })
-
 public class FhirProxyWebApp {
 
 	public static void main(String[] args) {
