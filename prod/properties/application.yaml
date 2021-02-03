@@ -3,7 +3,7 @@ spring:
     url: 'jdbc:postgresql://consolidated-server-data:5432/consolidated-server?currentSchema=hapi_fhir'
     #url: jdbc:h2:mem:test_mem
     username: cs_user
-    password: 
+    password: postgresPassword
     driverClassName: org.postgresql.Driver
     max-active: 15
   jpa:

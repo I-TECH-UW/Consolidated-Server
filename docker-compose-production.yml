@@ -4,6 +4,8 @@ services:
     image: postgres:12-alpine
     env_file:
     - ./prod/database/database.env # configure postgres
+    ports:
+    - 5432:5432
     volumes:
     - /var/lib/consolidated-server/data:/var/lib/postgresql/data
     - ./prod/database/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
