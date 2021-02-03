@@ -76,7 +76,6 @@ services:
       - DB_USER_FILE=/run/secrets/db_user
       - DB_PASSWORD_FILE=/run/secrets/db_password
       ports:
-      - 8083:8080
       - 8446:8443
       volumes:
       - ./prod/ssl/cs.crt:/etc/x509/https/tls.crt
