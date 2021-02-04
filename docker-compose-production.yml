@@ -21,7 +21,7 @@ services:
     - 8444:8443
     volumes:
     - ./prod/properties/application.yaml:/data/hapi/application.yaml
-    - ./prod/tomcat/hapi.server.xml:/usr/local/tomcat/conf/server.xml
+    - ./prod/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
     - ./prod/ssl/cs.keystore:/usr/local/tomcat/certs/keystore
     - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
     environment: 
