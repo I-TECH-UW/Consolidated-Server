@@ -3,6 +3,7 @@ services:
   consolidated-server-data:
     container_name: cs-postgres
     image: postgres:12-alpine
+    restart: always
     env_file:
     - ./prod/database/database.env # configure postgres
     ports:
