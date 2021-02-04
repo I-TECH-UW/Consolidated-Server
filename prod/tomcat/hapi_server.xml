@@ -76,10 +76,12 @@
                enableLookups="true" disableUploadTimeout="true"
                acceptCount="100" debug="0" scheme="https" secure="true"
                clientAuth="true" sslProtocol="TLS" SSLEnabled="true" 
-               keystoreFile="/run/secrets/keystore"
-               keystorePass=""
-               truststoreFile="/run/secrets/truststore"
-               truststorePass="" />
+               keystoreFile="/usr/local/tomcat/certs/keystore"
+               keystorePass="passwordForKeystore"
+               keystoreType="PKCS12"
+               truststoreFile="/usr/local/tomcat/certs/truststore"
+               truststorePass="passwordForTruststore"
+               truststoreType="PKCS12" />
                
     <!-- A "Connector" using the shared thread pool-->
     <!--
