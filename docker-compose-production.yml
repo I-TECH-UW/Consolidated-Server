@@ -1,6 +1,7 @@
 version: '3.3'
 services:
   consolidated-server-data:
+    container_name: cs-postgres
     image: postgres:12-alpine
     env_file:
     - ./prod/database/database.env # configure postgres
@@ -13,14 +14,18 @@ services:
     - backend-network
 
   hapi-fhir-jpaserver:
+    container_name: cs-hapi-fhir-jpaserver
     image: hapiproject/hapi:latest
     restart: always
+    ports:
+    - 8444:8443
     volumes:
     - ./prod/properties/application.yaml:/data/hapi/application.yaml
+    - ./prod/tomcat/hapi.server.xml:/usr/local/tomcat/conf/server.xml
+    - ./prod/ssl/cs.keystore:/usr/local/tomcat/certs/keystore
+    - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
     environment: 
       SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
-    ports:
-    - 8446:8443
     networks:
     - backend-network
     
@@ -56,6 +61,7 @@ services:
     - frontend-network
     - backend-network
     
+  #accessed through nginx container
   openhim-console:
     container_name: openhim-console
     restart: always
