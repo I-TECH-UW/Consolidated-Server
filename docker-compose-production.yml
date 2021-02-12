@@ -7,7 +7,7 @@ services:
     env_file:
     - ./prod/database/postgres/database.env # configure postgres
     ports:
-    - 15432:5432
+    - 5432:5432
     volumes:
     - /var/lib/consolidated-server/postgresdata:/var/lib/postgresql/data
     - ./prod/database/postgres/init/:/docker-entrypoint-initdb.d/
@@ -110,7 +110,7 @@ services:
 #     env_file:
 #     - ./prod/database/postgres/database.env # configure postgres
 #     ports:
-#     - 15432:5432
+#     - 5432:5432
 #     volumes:
 #     - /var/lib/consolidated-server/data:/var/lib/postgresql/data
 #     - ./prod/database/postgres/dbInit.sql:/docker-entrypoint-initdb.d/dbInit.sql
@@ -154,7 +154,7 @@ services:
 #    environment:
 #    - DB_VENDOR=postgres
 #    - DB_ADDR=host.openelis.org
-#    - DB_PORT=15432
+#    - DB_PORT=5432
 #    - DB_DATABASE=consolidated_server
 #    - DB_SCHEMA=keycloak
 #    - DB_USER_FILE=/run/secrets/db_user
