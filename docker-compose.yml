@@ -118,7 +118,7 @@ services:
       - DB_VENDOR=postgres
       - DB_ADDR=consolidated-server-data
       - DB_PORT=5432
-      - DB_DATABASE=consolidated-server
+      - DB_DATABASE=consolidated_server
       - DB_SCHEMA=keycloak
       - DB_USER=cs_user
       - DB_PASSWORD=cs_password
