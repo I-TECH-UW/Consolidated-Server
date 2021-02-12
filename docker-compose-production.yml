@@ -37,12 +37,12 @@ services:
     - 27017:27017
     image: mongo:3.4 
     environment:
-    - MONGO_INITDB_ROOT_USERNAME_FILE=/var/libcs_user
-    - MONGO_INITDB_ROOT_PASSWORD_FILE=postgresPassword
+    - MONGO_INITDB_ROOT_USERNAME_FILE=/var/lib/openhim/mongo_user
+    - MONGO_INITDB_ROOT_PASSWORD_FILE=/var/lib/openhim/mongo_password
     volumes:
      - /var/lib/consolidated-server/mongodata:/data/db
-     - ./prod/database/mongo_db_root_user:/var/lib/openhim
-     - ./prod/database/mongo_db_root_password:/var/lib/openhim
+     - ./prod/database/mongo_db_root_user:/var/lib/openhim/mongo_user
+     - ./prod/database/mongo_db_root_password:/var/lib/openhim/mongo_password
     networks:
     - backend-network
     
