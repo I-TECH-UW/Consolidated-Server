@@ -55,9 +55,8 @@ services:
     container_name: openhim-core
     restart: always
     image: jembi/openhim-core
-    environment:
-    - mongo_url=mongodb://cs_user:databaseAdminPassword@mongo/openhim
-    - mongo_atnaUrl=mongodb://cs_user:databasePassword@mongo/openhim
+    env_file:
+    - prod/properties/openhim.env
     ports:
     - 8080:8080
     - 5000:5000
