@@ -67,6 +67,8 @@ services:
     - 7788:7788
     depends_on:
     - mongo
+    volumes:
+    - ./prod/properties/openhim-core_default.json:/usr/src/app/config/default.json
     networks:
     - frontend-network
     - backend-network
@@ -81,7 +83,7 @@ services:
     - ./prod/ssl/cs.crt:/etc/nginx/serverCerts/cs.crt
     - ./prod/ssl/cs.key:/etc/nginx/serverCerts/cs.key
     - ./prod/ssl/key_pass:/etc/nginx/private/key_pass
-    - ./prod/properties/default.json:/usr/share/nginx/html/config/default.json
+    - ./prod/properties/openhim-console_default.json:/usr/share/nginx/html/config/default.json
     networks:
     - frontend-network
     - backend-network
