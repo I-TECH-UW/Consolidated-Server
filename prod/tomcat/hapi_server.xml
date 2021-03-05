@@ -66,10 +66,6 @@
          APR (HTTP/AJP) Connector: /docs/apr.html
          Define a non-SSL/TLS HTTP/1.1 Connector on port 8080
     -->
-    <Connector port="8080" protocol="HTTP/1.1"
-   			   URIEncoding="UTF-8"
-               connectionTimeout="20000"
-               redirectPort="8443" />
                
     <Connector port="8443" minProcessors="5" maxProcessors="75"
    			   URIEncoding="UTF-8"

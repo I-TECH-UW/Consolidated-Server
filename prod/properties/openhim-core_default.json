@@ -1,8 +1,8 @@
 {
   "bindAddress": "0.0.0.0",
   "mongo": {
-    "url": "mongodb://localhost/openhim",
-    "atnaUrl": "mongodb://localhost/openhim",
+    "url": "mongodb://cs_user:databasePassword@mongo/openhim",
+    "atnaUrl": "mongodb://cs_user:databasePassword@mongo/openhim",
     "connectionOptions": {},
     "openHIMApiReadPreference": "primaryPreferred",
     "openHIMApiWriteConcern": 1,
@@ -21,7 +21,7 @@
     }
   },
   "router": {
-    "externalHostname": "localhost",
+    "externalHostname": "host.openelis.org",
     "httpPort": 5001,
     "httpsPort": 5000,
     "timeout": 60000
@@ -93,8 +93,8 @@
   "alerts": {
     "enableAlerts": true,
     "pollPeriodMinutes": 1,
-    "himInstance": "Local OpenHIM",
-    "consoleURL": "http://localhost:9000"
+    "himInstance": "host.openelis.org",
+    "consoleURL": "https://host.openelis.org/openhim-console/"
   },
   "reports": {
     "enableReports": true,
