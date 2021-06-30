@@ -14,6 +14,16 @@ services:
     networks:
     - backend-network
 
+  fhir-hose.openelis.org:
+    image: fhir-hose
+    build:
+      context: ./bulk-data-requester/
+      dockerfile: docker/docker-build/Dockerfile
+    restart: always
+    volumes:
+      - ./prod/ssl/cs.keystore:/usr/local/tomcat/certs/keystore
+      - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
+
   hapi-fhir-jpaserver:
     container_name: cs-hapi-fhir-jpaserver
     image: hapiproject/hapi:latest
