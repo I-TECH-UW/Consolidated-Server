@@ -1,25 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 
 # Author : Caleb Steele-Lane
 
-echo -n server address: 
-read SERVER
+read -p "server address: " SERVER
 echo
 
-echo -n database admin password: 
-read -s DB_ADMIN_PASSWORD
+read -sp "database admin password: " DB_ADMIN_PASSWORD
 echo
 
-echo -n database password: 
-read -s DB_PASSWORD
+read -sp "database password: " DB_PASSWORD
 echo
 
-echo -n keystore password: 
-read -s KEY_PASS
+read -sp "keystore password: " KEY_PASS
 echo
 
-echo -n truststore password: 
-read -s TRUST_PASS
+read -sp "truststore password: " TRUST_PASS
 echo
 
 
