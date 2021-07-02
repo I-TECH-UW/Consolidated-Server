@@ -7,7 +7,7 @@ services:
     env_file:
     - ./dev/database/postgres/database.env # configure postgres
     ports:
-    - 5432:5432
+    - 55432:5432
     volumes:
     - /var/lib/consolidated-server/postgresdata:/var/lib/postgresql/data
     - ./dev/database/postgres/init/:/docker-entrypoint-initdb.d/
@@ -15,6 +15,7 @@ services:
     - backend-network
 
   fhir-hose.openelis.org:
+    container_name: cs-fhir-hose
     image: fhir-hose
     build:
       context: ./bulk-data-requester/
@@ -31,7 +32,7 @@ services:
     image: hapiproject/hapi:latest
     restart: always
     ports:
-    - 8444:8443
+    - 58444:8443
     volumes:
     - ./dev/properties/application.yaml:/data/hapi/application.yaml
     - ./dev/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
@@ -70,13 +71,13 @@ services:
     env_file:
     - dev/properties/openhim.env
     ports:
-    - 8080:8080
-    - 5000:5000
-    - 5001:5001
-    - 5050:5050
-    - 5051:5051
-    - 5052:5052
-    - 7788:7788
+    - 58080:8080
+    - 55000:5000
+    - 55001:5001
+    - 55050:5050
+    - 55051:5051
+    - 55052:5052
+    - 57788:7788
     depends_on:
     - mongo
     volumes:
@@ -105,8 +106,8 @@ services:
     container_name: nginx
     restart: always
     ports:
-    - 80:80
-    - 443:443
+    - 50080:80
+    - 50443:443
     volumes:
     - ./dev/conf/nginx_main.conf:/etc/nginx/conf.d/default.conf
     - ./dev/ssl/cs_frontend.crt:/etc/nginx/serverCerts/cs.crt
