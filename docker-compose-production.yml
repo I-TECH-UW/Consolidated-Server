@@ -23,6 +23,8 @@ services:
     volumes:
       - ./prod/ssl/cs.keystore:/usr/local/tomcat/certs/keystore
       - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
+    networks:
+      - backend-network
 
   hapi-fhir-jpaserver:
     container_name: cs-hapi-fhir-jpaserver
