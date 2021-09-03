@@ -66,7 +66,7 @@ hapi:
     auto_create_placeholder_reference_targets: true
 #    default_encoding: JSON
 #    default_pretty_print: true
-#    default_page_size: 20
+    default_page_size: 200
 #    enable_index_missing_fields: false
 #    enforce_referential_integrity_on_delete: false
 #    enforce_referential_integrity_on_write: false
