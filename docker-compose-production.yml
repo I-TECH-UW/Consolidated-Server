@@ -29,7 +29,9 @@ services:
 
   hapi-fhir-jpaserver:
     container_name: cs-hapi-fhir-jpaserver
-    image: hapiproject/hapi:latest
+    build:
+      context: ./prod/fhir/
+      dockerfile: Dockerfile
     restart: always
     ports:
     - 8444:8443
@@ -38,10 +40,16 @@ services:
     - ./prod/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
     - ./prod/ssl/cs.keystore:/usr/local/tomcat/certs/keystore
     - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
+    - ./prod/fhir/healthcheck.sh:/healthcheck.sh
     environment: 
       SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
     networks:
     - backend-network
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      timeout: 10s
+      interval: 30s
+      retries: 2
     
   mongo:
     container_name: openhim-mongo
@@ -115,6 +123,24 @@ services:
     - ./prod/ssl/key_pass_frontend:/etc/nginx/private/key_pass
     networks:
     - frontend-network
+    
+  autoheal:
+    container_name: autoheal
+    image: willfarrell/autoheal:1.2.0
+    tty: true
+    restart: always
+    networks:
+      - frontend-network
+      - backend-network
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
     
 networks:
   frontend-network: 
