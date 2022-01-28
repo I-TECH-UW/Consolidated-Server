@@ -14,4 +14,3 @@ if [ $(curl -k --fail --silent --cert-type P12 --cert /usr/local/tomcat/certs/ke
 else
 	exit 1;
 fi
-

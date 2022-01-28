@@ -13,6 +13,17 @@ services:
     - ./prod/database/postgres/init/:/docker-entrypoint-initdb.d/
     networks:
     - backend-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      timeout: 10s
+      interval: 30s
+      start_period: 30s
+      retries: 3
 
   fhir-hose.openelis.org:
     container_name: cs-fhir-hose
@@ -26,6 +37,11 @@ services:
       - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
     networks:
       - backend-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
 
   hapi-fhir-jpaserver:
     container_name: cs-hapi-fhir-jpaserver
@@ -45,11 +61,17 @@ services:
       SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
     networks:
     - backend-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
     healthcheck:
       test: ["CMD", "/healthcheck.sh"]
       timeout: 10s
       interval: 30s
-      retries: 2
+      start_period: 60s
+      retries: 3
     
   mongo:
     container_name: openhim-mongo
@@ -71,6 +93,17 @@ services:
      - ./prod/database/mongo/db_password:/var/lib/openhim/mongo_password
     networks:
     - backend-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongodb://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/?authSource=${DB_NAME} --quiet
+      timeout: 10s
+      interval: 30s
+      start_period: 60s
+      retries: 3
     
   openhim-core:
     container_name: openhim-core
@@ -93,6 +126,17 @@ services:
     networks:
     - frontend-network
     - backend-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
+    healthcheck:
+      test: "curl -sSk https://openhim-core:8080/heartbeat || exit 1"
+      interval: 30s
+      timeout: 30s
+      start_period: 60s
+      retries: 3
     
   #accessed through nginx container
   openhim-console:
@@ -108,6 +152,17 @@ services:
     networks:
     - frontend-network
     - backend-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
+    healthcheck:
+      test: "curl -sSk https://openhim-console || exit 1"
+      interval: 30s
+      timeout: 30s
+      start_period: 60s
+      retries: 3
     
   nginx:
     image: nginx:latest
@@ -123,6 +178,17 @@ services:
     - ./prod/ssl/key_pass_frontend:/etc/nginx/private/key_pass
     networks:
     - frontend-network
+    logging:
+      driver: "local"
+      options:
+        max-size: "20m"
+        max-file: "50"
+    healthcheck:
+      test: "service nginx status || exit 1"
+      interval: 30s
+      timeout: 30s
+      start_period: 60s
+      retries: 3
     
   autoheal:
     container_name: autoheal
