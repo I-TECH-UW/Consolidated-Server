@@ -41,6 +41,11 @@ services:
       options:
         max-size: "20m"
         max-file: "50"
+    healthcheck:
+      test: ["CMD", "curl --fail --silent localhost:8080/actuator/health | grep UP || exit 1"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
 
   hapi-fhir-jpaserver:
     container_name: cs-hapi-fhir-jpaserver
