@@ -34,6 +34,7 @@ services:
     volumes:
       - ./prod/ssl/cs.keystore:/usr/local/tomcat/certs/keystore
       - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
+      - ./bulk-data-requester/docker/healthcheck.sh:/healthcheck.sh
     networks:
       - backend-network
     logging:
@@ -42,7 +43,7 @@ services:
         max-size: "20m"
         max-file: "50"
     healthcheck:
-      test: ["CMD", "curl --fail --silent -k https://fhir-hose.openelis.org:8080/actuator/health | grep UP || exit 1"]
+      test: ["CMD", "/healthcheck.sh"]
       timeout: 10s
       interval: 30s
       retries: 3
