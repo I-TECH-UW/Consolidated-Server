@@ -97,7 +97,7 @@ services:
         max-size: "20m"
         max-file: "50"
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongodb://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/?authSource=${DB_NAME} --quiet
+      test: echo 'db.runCommand("ping").ok' | mongo mongodb://mongo:27017/openhim --quiet
       timeout: 10s
       interval: 30s
       retries: 3
