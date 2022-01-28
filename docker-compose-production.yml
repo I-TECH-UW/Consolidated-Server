@@ -22,7 +22,6 @@ services:
       test: ["CMD", "pg_isready"]
       timeout: 10s
       interval: 30s
-      start_period: 30s
       retries: 3
 
   fhir-hose.openelis.org:
@@ -70,7 +69,6 @@ services:
       test: ["CMD", "/healthcheck.sh"]
       timeout: 10s
       interval: 30s
-      start_period: 60s
       retries: 3
     
   mongo:
@@ -102,7 +100,6 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongo mongodb://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/?authSource=${DB_NAME} --quiet
       timeout: 10s
       interval: 30s
-      start_period: 60s
       retries: 3
     
   openhim-core:
@@ -135,7 +132,6 @@ services:
       test: "curl -sSk https://openhim-core:8080/heartbeat || exit 1"
       interval: 30s
       timeout: 30s
-      start_period: 60s
       retries: 3
     
   #accessed through nginx container
@@ -161,7 +157,6 @@ services:
       test: "curl -sSk https://openhim-console || exit 1"
       interval: 30s
       timeout: 30s
-      start_period: 60s
       retries: 3
     
   nginx:
@@ -187,7 +182,6 @@ services:
       test: "service nginx status || exit 1"
       interval: 30s
       timeout: 30s
-      start_period: 60s
       retries: 3
     
   autoheal:
