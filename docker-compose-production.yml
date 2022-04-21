@@ -166,7 +166,7 @@ services:
       retries: 3
     
   nginx:
-    image: nginx:latest
+    image: nginx:1.21.6
     container_name: nginx
     restart: always
     ports:
