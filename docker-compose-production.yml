@@ -123,7 +123,9 @@ services:
   openhim-core:
     container_name: openhim-core
     restart: always
-    image: jembi/openhim-core:7.0.2
+    build:
+      context: ./prod/openhim-core/
+      dockerfile: Dockerfile
     env_file:
     - prod/properties/openhim.env
     ports:
