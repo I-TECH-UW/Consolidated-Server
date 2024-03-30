@@ -1,3 +1,4 @@
-FROM hapiproject/hapi:v5.4.1
-
-RUN apt-get update && apt-get install -y curl
+FROM hapiproject/hapi:v6.10.1-tomcat
+USER root
+RUN apt update && apt install -y curl
+USER 1001

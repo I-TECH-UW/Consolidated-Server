@@ -1,4 +1,32 @@
-version: '3.3'
+version: '3.8'
+
+x-logging:
+  &local-logging
+  driver: "local"
+  options:
+    max-size: "20m"
+    max-file: "50"
+
+x-loki-logging:
+  &loki-logging
+  driver: "loki"
+  options:
+    max-size: "20m"
+    max-file: "50"
+    loki-url: "[% loki_url %]"
+    loki-external-labels: "container_name={{.Name}},hostname=[% host_name %]"
+    loki-pipeline-stages: |
+          - multiline:
+              firstline: '^\d{4}-\d{2}-\d{2}[T ]?\d{2}:\d{2}:\d{2}.\d{3}'
+          - labeldrop:
+              - compose_project
+              - compose_service
+              - filename
+              - source
+              - stream
+              - swarm_service
+              - swarm_stack
+              
 services:
   consolidated-server-data:
     container_name: cs-postgres
@@ -13,11 +41,7 @@ services:
     - ./prod/database/postgres/init/:/docker-entrypoint-initdb.d/
     networks:
     - backend-network
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     healthcheck:
       test: ["CMD", "pg_isready"]
       timeout: 10s
@@ -37,11 +61,7 @@ services:
       - ./bulk-data-requester/docker/healthcheck.sh:/healthcheck.sh
     networks:
       - backend-network
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     healthcheck:
       test: ["CMD", "/healthcheck.sh"]
       timeout: 10s
@@ -66,11 +86,7 @@ services:
       SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
     networks:
     - backend-network
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     healthcheck:
       test: ["CMD", "/healthcheck.sh"]
       timeout: 10s
@@ -97,11 +113,7 @@ services:
      - ./prod/database/mongo/db_password:/var/lib/openhim/mongo_password
     networks:
     - backend-network
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo mongodb://mongo:27017/openhim --quiet
       timeout: 10s
@@ -129,11 +141,7 @@ services:
     networks:
     - frontend-network
     - backend-network
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     healthcheck:
       test: "curl -sSk https://openhim-core:8080/heartbeat || exit 1"
       interval: 30s
@@ -154,11 +162,7 @@ services:
     networks:
     - frontend-network
     - backend-network
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     healthcheck:
       test: "curl -sSk https://openhim-console || exit 1"
       interval: 30s
@@ -179,11 +183,7 @@ services:
     - ./prod/ssl/key_pass_frontend:/etc/nginx/private/key_pass
     networks:
     - frontend-network
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     healthcheck:
       test: "service nginx status || exit 1"
       interval: 30s
@@ -202,11 +202,7 @@ services:
       - AUTOHEAL_CONTAINER_LABEL=all
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    logging:
-      driver: "local"
-      options:
-        max-size: "20m"
-        max-file: "50"
+    logging: *local-logging
     
 networks:
   frontend-network: 
