@@ -72,10 +72,10 @@
                enableLookups="true" disableUploadTimeout="true"
                acceptCount="100" debug="0" scheme="https" secure="true"
                clientAuth="true" sslProtocol="TLS" SSLEnabled="true" 
-               keystoreFile="/usr/local/tomcat/certs/keystore"
+               keystoreFile="/opt/bitnami/tomcat/certs/keystore"
                keystorePass="passwordForKeystore"
                keystoreType="PKCS12"
-               truststoreFile="/usr/local/tomcat/certs/truststore"
+               truststoreFile="/opt/bitnami/tomcat/certs/truststore"
                truststorePass="passwordForTruststore"
                truststoreType="PKCS12" />
                

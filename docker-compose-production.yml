@@ -78,9 +78,9 @@ services:
     - 8444:8443
     volumes:
     - ./prod/properties/application.yaml:/data/hapi/application.yaml
-    - ./prod/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
-    - ./prod/ssl/cs.keystore:/usr/local/tomcat/certs/keystore
-    - ./prod/ssl/cs.truststore:/usr/local/tomcat/certs/truststore
+    - ./prod/tomcat/hapi_server.xml:/opt/bitnami/tomcat/conf/server.xml
+    - ./prod/ssl/cs.keystore:/opt/bitnami/tomcat/certs/keystore
+    - ./prod/ssl/cs.truststore:/opt/bitnami/tomcat/certs/truststore
     - ./prod/fhir/healthcheck.sh:/healthcheck.sh
     environment: 
       SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
