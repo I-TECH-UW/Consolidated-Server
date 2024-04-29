@@ -68,7 +68,7 @@ services:
       interval: 30s
       retries: 3
 
-  hapi-fhir-jpaserver:
+  cs-fhir.openelis.org:
     container_name: cs-hapi-fhir-jpaserver
     build:
       context: ./prod/fhir/
@@ -120,7 +120,7 @@ services:
       interval: 30s
       retries: 3
     
-  openhim-core:
+  cs-openhim-core.openelis.org:
     container_name: openhim-core
     restart: always
     build:
